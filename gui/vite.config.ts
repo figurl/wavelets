@@ -7,4 +7,7 @@ export default defineConfig({
     react()
   ],
   base: "/wavelets/",
+  worker: {
+    format: 'es'
+  }
 });
