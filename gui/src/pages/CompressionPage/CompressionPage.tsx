@@ -1,7 +1,7 @@
 import { FunctionComponent, useMemo } from "react";
 import { ControlPanelState, Filter } from "../../ControlPanel";
 import code1 from "./code1.py?raw";
-import { usePyodideResult } from "../ShowBasisWaveletsPage/useCoeffSizes";
+import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
 import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
 
 type CompressionPageProps = {

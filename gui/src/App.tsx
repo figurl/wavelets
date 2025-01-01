@@ -7,7 +7,7 @@ import ControlPanel, {
   defaultControlPanelState,
 } from "./ControlPanel";
 import Splitter from "./components/Splitter";
-import ShowBasisWaveletsPage from "./pages/ShowBasisWaveletsPage/ShowBasisWaveletsPage";
+import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
 
 function App() {
@@ -74,12 +74,11 @@ const MainWindow2: FunctionComponent<MainWindow2Props> = ({
   height,
   controlPanelState,
 }) => {
-  if (controlPanelState.page === "show-basis-wavelets") {
+  if (controlPanelState.page === "wavelets") {
     return (
-      <ShowBasisWaveletsPage
+      <WaveletsPage
         width={width}
         height={height}
-        controlPanelState={controlPanelState}
       />
     );
   } else if (controlPanelState.page === "compression") {
