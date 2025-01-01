@@ -14,8 +14,14 @@ type WaveletsPageProps = {
 const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({ width, height }) => {
   return (
     <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
-      <Markdown source={wavelets_md} />
-      <WaveletsPageChild />
+      <Markdown source={wavelets_md}
+        divHandler={({ className, props, children }) => {
+          if (className === "main") {
+            return <WaveletsPageChild />;
+          }
+          return <div {...props}>{children}</div>;
+        }}
+      />
     </div>
   );
 }

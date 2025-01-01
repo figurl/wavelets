@@ -6,4 +6,4 @@ Wavelets are the building blocks used to represent signals in wavelet analysis. 
 
 The below graphs show wavelets at different scales and positions. You can use the selection controls to specify the wavelet type and the number of samples in the signal. These are calculated using the [PyWavelets](https://pywavelets.readthedocs.io/) library and [Pyodide](https://pyodide.org/).
 
----
+<div class="main"></div>

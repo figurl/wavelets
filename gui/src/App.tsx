@@ -2,10 +2,7 @@ import { useWindowDimensions } from "@fi-sci/misc";
 import "./App.css";
 
 import { FunctionComponent, useState } from "react";
-import ControlPanel, {
-  ControlPanelState,
-  defaultControlPanelState,
-} from "./ControlPanel";
+import ControlPanel from "./ControlPanel";
 import Splitter from "./components/Splitter";
 import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
@@ -42,9 +39,7 @@ type MainWindowProps = {
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
   const initialControlPanelWidth = Math.min(250, width / 2);
-  const [controlPanelState, setControlPanelState] = useState<ControlPanelState>(
-    defaultControlPanelState
-  );
+  const [page, setPage] = useState<"wavelets" | "compression">("wavelets");
   return (
     <Splitter
       width={width}
@@ -55,10 +50,10 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
       <ControlPanel
         width={0}
         height={0}
-        controlPanelState={controlPanelState}
-        setControlPanelState={setControlPanelState}
+        page={page}
+        setPage={setPage}
       />
-      <MainWindow2 width={0} height={0} controlPanelState={controlPanelState} />
+      <MainWindow2 width={0} height={0} page={page} />
     </Splitter>
   );
 };
@@ -66,31 +61,30 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
 type MainWindow2Props = {
   width: number;
   height: number;
-  controlPanelState: ControlPanelState;
+  page: "wavelets" | "compression";
 };
 
 const MainWindow2: FunctionComponent<MainWindow2Props> = ({
   width,
   height,
-  controlPanelState,
+  page,
 }) => {
-  if (controlPanelState.page === "wavelets") {
+  if (page === "wavelets") {
     return (
       <WaveletsPage
         width={width}
         height={height}
       />
     );
-  } else if (controlPanelState.page === "compression") {
+  } else if (page === "compression") {
     return (
       <CompressionPage
         width={width}
         height={height}
-        controlPanelState={controlPanelState}
       />
     );
   } else {
-    return <div>Unknown page: {controlPanelState["page"]}</div>;
+    return <div>Unknown page: {page}</div>;
   }
 };
 

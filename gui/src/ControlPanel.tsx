@@ -1,10 +1,12 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, useState } from "react";
+
+type Page = "wavelets" | "compression";
 
 type ControlPanelProps = {
   width: number;
   height: number;
-  controlPanelState: ControlPanelState;
-  setControlPanelState: (state: ControlPanelState) => void;
+  page: Page;
+  setPage: (page: Page) => void;
 };
 
 // print(pywt.wavelist(kind='discrete'))
@@ -205,266 +207,56 @@ export const waveletNameChoices = [
 ];
 
 export type Filter = "none" | "300-6000 Hz" | "300- Hz";
-const filterChoices = ["none", "300-6000 Hz", "300- Hz"];
-
-export type ControlPanelState =
-  | {
-      page: "wavelets";
-      waveletName: WaveletName;
-      numSamples: number;
-    }
-  | {
-      page: "compression";
-      waveletName: WaveletName;
-      numSamples: number;
-      filter: Filter;
-    };
-
-const defaultControlPanelStateWavelets: ControlPanelState = {
-  page: "wavelets",
-  waveletName: "db4",
-  numSamples: 512,
-};
-
-const defaultControlPanelStateCompression: ControlPanelState = {
-  page: "compression",
-  waveletName: "db4",
-  numSamples: 256,
-  filter: "none",
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const defaultControlPanelState = defaultControlPanelStateWavelets;
-
-const numSamplesChoices = [32, 64, 128, 256, 512, 1024];
-
-const transitionControlPanelState = (
-  state: ControlPanelState,
-  page: "wavelets" | "compression"
-): ControlPanelState => {
-  if (page === "wavelets") {
-    return {
-      ...defaultControlPanelStateWavelets,
-      waveletName: state.waveletName,
-    };
-  } else if (page === "compression") {
-    return {
-      ...defaultControlPanelStateCompression,
-      waveletName: state.waveletName,
-    };
-  } else {
-    throw new Error("Invalid page");
-  }
-};
 
 const ControlPanel: FunctionComponent<ControlPanelProps> = ({
   width,
   height,
-  controlPanelState,
-  setControlPanelState,
+  page,
+  setPage,
 }) => {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   return (
     <div
       style={{
         width,
         height,
         overflowY: "auto",
+        padding: "15px",
       }}
     >
-      <table>
-        <tbody>
-          <tr>
-            <td>Page:</td>
-            <td>
-              <select
-                value={controlPanelState.page}
-                onChange={(e) => {
-                  if (e.target.value === "wavelets") {
-                    setControlPanelState(
-                      transitionControlPanelState(
-                        controlPanelState,
-                        "wavelets"
-                      )
-                    );
-                  } else if (e.target.value === "compression") {
-                    setControlPanelState(
-                      transitionControlPanelState(
-                        controlPanelState,
-                        "compression"
-                      )
-                    );
-                  }
-                }}
-              >
-                <option value="wavelets">Wavelets</option>
-                <option value="compression">Compression</option>
-              </select>
-            </td>
-          </tr>
-          {controlPanelState.page === "wavelets" ? (
-            <ControlPanelWavelets
-              width={width}
-              controlPanelState={controlPanelState}
-              setControlPanelState={setControlPanelState}
-            />
-          ) : controlPanelState.page === "compression" ? (
-            <ControlPanelCompression
-              width={width}
-              controlPanelState={controlPanelState}
-              setControlPanelState={setControlPanelState}
-            />
-          ) : (
-            <tr>
-              <td colSpan={2}>Invalid page</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      <div style={{ fontSize: '1.2em', fontWeight: 'bold', marginBottom: '15px' }}>
+        Contents
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {[
+          { id: "wavelets", label: "Wavelets" },
+          { id: "compression", label: "Compression" }
+        ].map(item => (
+          <div
+              key={item.id}
+              onClick={() => setPage(item.id as Page)}
+              onMouseEnter={() => setHoveredId(item.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              style={{
+                padding: "8px 12px",
+                cursor: "pointer",
+                backgroundColor: page === item.id
+                  ? "#e0e0e0"
+                  : hoveredId === item.id
+                    ? "#f0f0f0"
+                    : "transparent",
+                borderRadius: "4px",
+                transition: "all 0.2s ease",
+                borderLeft: page === item.id ? "3px solid #007bff" : "3px solid transparent"
+              }}
+            >
+              {item.label}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-type ControlPanelProps2 = {
-  width: number;
-  controlPanelState: ControlPanelState;
-  setControlPanelState: (state: ControlPanelState) => void;
-};
-
-const ControlPanelWavelets: FunctionComponent<ControlPanelProps2> = ({
-  controlPanelState,
-  setControlPanelState,
-}) => {
-  return (
-    <>
-      <WaveletNameSelection
-        waveletName={controlPanelState.waveletName}
-        setWaveletName={(waveletName) =>
-          setControlPanelState({ ...controlPanelState, waveletName })
-        }
-      />
-      <NumSamplesSelection
-        numSamples={controlPanelState.numSamples}
-        setNumSamples={(numSamples) =>
-          setControlPanelState({ ...controlPanelState, numSamples })
-        }
-      />
-    </>
-  );
-};
-
-const ControlPanelCompression: FunctionComponent<ControlPanelProps2> = ({
-  controlPanelState,
-  setControlPanelState,
-}) => {
-  if (controlPanelState.page !== "compression") {
-    throw new Error("Invalid page");
-  }
-  return (
-    <>
-      <WaveletNameSelection
-        waveletName={controlPanelState.waveletName}
-        setWaveletName={(waveletName) =>
-          setControlPanelState({ ...controlPanelState, waveletName })
-        }
-      />
-      <NumSamplesSelection
-        numSamples={controlPanelState.numSamples}
-        setNumSamples={(numSamples) =>
-          setControlPanelState({ ...controlPanelState, numSamples })
-        }
-      />
-      <FilterSelection
-        filter={controlPanelState.filter}
-        setFilter={(filter) =>
-          setControlPanelState({ ...controlPanelState, filter })
-        }
-      />
-    </>
-  );
-};
-
-type WaveletNameSelectionProps = {
-  waveletName: WaveletName;
-  setWaveletName: (waveletName: WaveletName) => void;
-};
-
-const WaveletNameSelection: FunctionComponent<WaveletNameSelectionProps> = ({
-  waveletName,
-  setWaveletName,
-}) => {
-  return (
-    <tr>
-      <td>Wavelet:</td>
-      <td>
-        <select
-          value={waveletName}
-          onChange={(e) => setWaveletName(e.target.value as WaveletName)}
-        >
-          {waveletNameChoices.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </td>
-    </tr>
-  );
-};
-
-type NumSamplesSelectionProps = {
-  numSamples: number;
-  setNumSamples: (numSamples: number) => void;
-};
-
-const NumSamplesSelection: FunctionComponent<NumSamplesSelectionProps> = ({
-  numSamples,
-  setNumSamples,
-}) => {
-  return (
-    <tr>
-      <td># samples:</td>
-      <td>
-        <select
-          value={numSamples}
-          onChange={(e) => setNumSamples(parseInt(e.target.value))}
-        >
-          {numSamplesChoices.map((numSamples) => (
-            <option key={numSamples} value={numSamples}>
-              {numSamples}
-            </option>
-          ))}
-        </select>
-      </td>
-    </tr>
-  );
-};
-
-type FilterSelectionProps = {
-  filter: Filter;
-  setFilter: (filter: Filter) => void;
-};
-
-const FilterSelection: FunctionComponent<FilterSelectionProps> = ({
-  filter,
-  setFilter,
-}) => {
-  return (
-    <tr>
-      <td>Filter:</td>
-      <td>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value as Filter)}
-        >
-          {filterChoices.map((filter) => (
-            <option key={filter} value={filter}>
-              {filter}
-            </option>
-          ))}
-        </select>
-      </td>
-    </tr>
-  );
-};
 
 export default ControlPanel;

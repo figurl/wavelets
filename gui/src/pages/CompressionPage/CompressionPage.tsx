@@ -1,30 +1,44 @@
-import { FunctionComponent, useMemo } from "react";
-import { ControlPanelState, Filter } from "../../ControlPanel";
+import { FunctionComponent, useMemo, useState } from "react";
+import { Filter, WaveletName, waveletNameChoices } from "../../ControlPanel";
 import code1 from "./code1.py?raw";
 import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
 import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
+import Markdown from "../../Markdown/Markdown";
+import compression_md from "./compression.md?raw";
 
 type CompressionPageProps = {
   width: number;
   height: number;
-  controlPanelState: ControlPanelState;
 };
 
-const CompressionPage: FunctionComponent<CompressionPageProps> = ({
-  width,
-  height,
-  controlPanelState,
-}) => {
-  if (controlPanelState.page !== "compression") {
-    throw new Error("Invalid page");
-  }
-  const wavelet = controlPanelState.waveletName;
-  const numSamples = controlPanelState.numSamples;
-  const { filtLowcut, filtHighcut } = parseFilter(controlPanelState.filter);
+const CompressionPage: FunctionComponent<CompressionPageProps> = ({ width, height }) => {
+  return (
+    <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
+      <Markdown source={compression_md}
+        divHandler={({ className, props, children }) => {
+          if (className === "main") {
+            return <CompressionPageChild width={width} />;
+          }
+          return <div {...props}>{children}</div>;
+        }}
+      />
+    </div>
+  );
+}
+
+type CompressionPageChildProps = {
+  width: number;
+};
+
+const CompressionPageChild: FunctionComponent<CompressionPageChildProps> = ({ width }) => {
+  const [waveletName, setWaveletName] = useState<WaveletName>("db4");
+  const [numSamples, setNumSamples] = useState(512);
+  const [filter, setFilter] = useState<Filter>("none");
+  const { filtLowcut, filtHighcut } = parseFilter(filter);
   const code = `
 ${removeEverythingAfter(code1, "if __name__ == '__main__':")}
 code1(
-    wavelet_name='${wavelet}',
+    wavelet_name='${waveletName}',
     num_samples=5000,
     nrmses=[0.1, 0.2, 0.4, 0.6, 0.8],
     sampling_frequency=30000,
@@ -56,17 +70,22 @@ code1(
   console.log("stdevOriginal", stdevOriginal);
 
   return (
-    <div
-      className="CompressionPage"
-      style={{ position: "absolute", width, height, overflowY: "auto" }}
-    >
+    <div>
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        <WaveletNameSelector waveletName={waveletName} setWaveletName={setWaveletName} includeFourier={true} />
+        &nbsp;&nbsp;
+        <NumSamplesSelector numSamples={numSamples} setNumSamples={setNumSamples} />
+        &nbsp;&nbsp;
+        <FilterSelector filter={filter} setFilter={setFilter} />
+      </div>
+      <hr />
       <CompressionRatioVsNRMSEPlot
         nrmses={result.compressed.map(({ nrmse }) => nrmse)}
         compressionRatios={result.compressed.map(
           ({ compression_ratio }) => compression_ratio
         )}
         width={Math.min(width, 600)}
-        height={500}
+        height={300}
       />
       {result.compressed.map(
         ({ nrmse, compressed, compression_ratio }, i) => (
@@ -217,5 +236,70 @@ const CompressionPlot: FunctionComponent<CompressionPlotProps> = ({
   }, [title, timestamps, original, compressed, width, height]);
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };
+
+const numSamplesChoices = [32, 64, 128, 256, 512, 1024];
+
+type NumSamplesSelectorProps = {
+  numSamples: number;
+  setNumSamples: (numSamples: number) => void;
+};
+
+const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({ numSamples, setNumSamples }) => {
+  return (
+    <div>
+      <label>Num samples:&nbsp;</label>
+      <select value={numSamples} onChange={(e) => setNumSamples(parseInt(e.target.value))}>
+        {numSamplesChoices.map((numSamples) => (
+          <option key={numSamples} value={numSamples}>
+            {numSamples}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+type WaveletNameSelectorProps = {
+  waveletName: string;
+  setWaveletName: (waveletName: WaveletName) => void;
+  includeFourier?: boolean;
+};
+
+const WaveletNameSelector: FunctionComponent<WaveletNameSelectorProps> = ({ waveletName, setWaveletName, includeFourier }) => {
+  return (
+    <div>
+      <label>Wavelet:&nbsp;</label>
+      <select value={waveletName} onChange={(e) => setWaveletName(e.target.value as WaveletName)}>
+        {waveletNameChoices.filter(c => includeFourier || (c !== "fourier")).map((name) => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+const filterChoices: Filter[] = ["none", "300-6000 Hz", "300- Hz"];
+
+type FilterSelectorProps = {
+  filter: Filter;
+  setFilter: (filter: Filter) => void;
+};
+
+const FilterSelector: FunctionComponent<FilterSelectorProps> = ({ filter, setFilter }) => {
+  return (
+    <div>
+      <label>Filter:&nbsp;</label>
+      <select value={filter} onChange={(e) => setFilter(e.target.value as Filter)}>
+        {filterChoices.map((name) => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 export default CompressionPage;

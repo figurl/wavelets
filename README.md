@@ -1,5 +1,7 @@
 # wavelets
 
+https://figurl.github.io/wavelets/
+
 ## For developers
 
 ```bash
