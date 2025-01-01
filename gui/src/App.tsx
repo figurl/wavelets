@@ -6,6 +6,7 @@ import ControlPanel from "./ControlPanel";
 import Splitter from "./components/Splitter";
 import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
+import OverviewPage from "./pages/OverviewPage/OverviewPage";
 
 function App() {
   const { width, height } = useWindowDimensions();
@@ -39,7 +40,7 @@ type MainWindowProps = {
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
   const initialControlPanelWidth = Math.min(250, width / 2);
-  const [page, setPage] = useState<"wavelets" | "compression">("wavelets");
+  const [page, setPage] = useState<"overview" | "wavelets" | "compression">("overview");
   return (
     <Splitter
       width={width}
@@ -61,7 +62,7 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
 type MainWindow2Props = {
   width: number;
   height: number;
-  page: "wavelets" | "compression";
+  page: "overview" | "wavelets" | "compression";
 };
 
 const MainWindow2: FunctionComponent<MainWindow2Props> = ({
@@ -69,7 +70,14 @@ const MainWindow2: FunctionComponent<MainWindow2Props> = ({
   height,
   page,
 }) => {
-  if (page === "wavelets") {
+  if (page === "overview") {
+    return (
+      <OverviewPage
+        width={width}
+        height={height}
+      />
+    );
+  } else if (page === "wavelets") {
     return (
       <WaveletsPage
         width={width}
