@@ -4,7 +4,7 @@
 import { FunctionComponent, useMemo, useState } from "react";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { darcula as highlighterStyle } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { darcula } from "react-syntax-highlighter/dist/esm/styles/prism";
 // import rehypeKatexPlugin from 'rehype-katex';
 import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 import { CopyAll, PlayArrow } from "@mui/icons-material";
@@ -69,13 +69,13 @@ const Markdown: FunctionComponent<Props> = ({
                 </span>
               )}
             </div>
+            {/* @ts-expect-error - SyntaxHighlighter has incompatible types with React 18.3 */}
             <SyntaxHighlighter
-              children={String(children).replace(/\n$/, "")}
-              style={highlighterStyle as any}
+              style={darcula}
               language={match[1]}
-              PreTag="div"
-              {...props}
-            />
+            >
+              {String(children).replace(/\n$/, "")}
+            </SyntaxHighlighter>
           </>
         ) : (
           <code className={className} {...props}>
