@@ -36,6 +36,7 @@ type ComputeTimePageChildProps = {
 };
 
 const waveletOptions = {
+  option0: ["fourier"],
   option1: ["db4"],
   option2: ["db2", "db4", "db6", "db8"],
   option3: ["db4", "db8", "db12", "db16"],
@@ -80,12 +81,20 @@ results = [
 
 # Plot the results
 import matplotlib.pyplot as plt
+import numpy as np
+
 wavelet_names = [r['wavelet_name'] for r in results]
-computation_times = [r['computation_time_msec'] for r in results]
-plt.bar(wavelet_names, computation_times)
+x = np.arange(len(wavelet_names))
+width = 0.35
+
+plt.bar(x - width/2, [r['dec_computation_time_msec'] for r in results], width, label='Decomposition')
+plt.bar(x + width/2, [r['rec_computation_time_msec'] for r in results], width, label='Reconstruction')
+
 plt.xlabel('Wavelet Name')
-plt.ylabel('Computation Time (ms)')
+plt.ylabel('Time (ms)')
 plt.title('Computation Time Comparison')
+plt.xticks(x, wavelet_names)
+plt.legend()
 plt.show()
 `, [numSamples, selectedWavelets]);
 
@@ -109,6 +118,7 @@ plt.show()
             value={selectedWavelets}
             onChange={(e) => setSelectedWavelets(e.target.value as keyof typeof waveletOptions)}
           >
+            <option value="option0">{`${waveletOptions.option0.join(", ")}`}</option>
             <option value="option1">{`${waveletOptions.option1.join(", ")}`}</option>
             <option value="option2">{`${waveletOptions.option2.join(", ")}`}</option>
             <option value="option3">{`${waveletOptions.option3.join(", ")}`}</option>
@@ -145,10 +155,10 @@ plt.show()
 
 type ComputationTimePlotProps = {
   results: Array<{
-    computation_time_msec: number;
+    dec_computation_time_msec: number;
+    rec_computation_time_msec: number;
     num_samples: number;
     wavelet_name: string;
-    num_vectors: number;
   }>;
   width: number;
   height: number;
@@ -163,9 +173,15 @@ const ComputationTimePlot: FunctionComponent<ComputationTimePlotProps> = ({
     const data = [
       {
         x: results.map((r) => r.wavelet_name),
-        y: results.map((r) => r.computation_time_msec), // Convert to milliseconds
+        y: results.map((r) => r.dec_computation_time_msec),
         type: "bar",
-        name: "Computation Time",
+        name: "Decomposition",
+      },
+      {
+        x: results.map((r) => r.wavelet_name),
+        y: results.map((r) => r.rec_computation_time_msec),
+        type: "bar",
+        name: "Reconstruction",
       },
     ];
     const layout = {
@@ -189,6 +205,7 @@ const ComputationTimePlot: FunctionComponent<ComputationTimePlotProps> = ({
         tickpadding: 5,
         ticklen: 4,
       },
+      barmode: 'group',
     };
     return { data, layout };
   }, [results, width, height]);

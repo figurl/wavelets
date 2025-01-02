@@ -16,11 +16,35 @@ def generate_test_signal(*, num_samples, num_vectors):
 
 def benchmark_wavelet_transform(wavelet_name, signal):
     """Benchmark wavelet transform computation time for 2D signal"""
-    start_time = time.time()
-    # Process each vector in the 2D signal
-    _ = pywt.wavedec(signal, wavelet_name)
-    end_time = time.time()
-    return end_time - start_time
+    if wavelet_name != 'fourier':
+        # Time decomposition
+        dec_start_time = time.time()
+        coeffs = pywt.wavedec(signal, wavelet_name)
+        dec_end_time = time.time()
+
+        # Time reconstruction
+        rec_start_time = time.time()
+        _ = pywt.waverec(coeffs, wavelet_name)
+        rec_end_time = time.time()
+
+        dec_time = dec_end_time - dec_start_time
+        rec_time = rec_end_time - rec_start_time
+        return dec_time, rec_time
+    else:  # fourier
+        # Time decomposition
+        dec_start_time = time.time()
+        coeffs = np.fft.rfft(signal)
+        dec_end_time = time.time()
+
+        # Time reconstruction
+        rec_start_time = time.time()
+        _ = np.fft.irfft(coeffs)
+        rec_end_time = time.time()
+
+        dec_time = dec_end_time - dec_start_time
+        rec_time = rec_end_time - rec_start_time
+
+        return dec_time, rec_time
 
 def benchmark_compute_time(*, wavelet_name, num_samples):
     """Main function to run benchmarks and return results"""
@@ -30,15 +54,18 @@ def benchmark_compute_time(*, wavelet_name, num_samples):
     # Generate test signal
     signal = generate_test_signal(num_samples=num_samples, num_vectors=num_vectors)
 
-    computation_times = []
+    dec_times = []
+    rec_times = []
     for _ in range(num_trials):
-        computation_time = benchmark_wavelet_transform(wavelet_name, signal)
-        computation_times.append(computation_time / num_vectors)
+        dec_time, rec_time = benchmark_wavelet_transform(wavelet_name, signal)
+        dec_times.append(dec_time / num_vectors)
+        rec_times.append(rec_time / num_vectors)
 
     # Return results in format suitable for plotting
     return {
         'num_samples': num_samples,
-        'computation_time_msec': np.mean(computation_times) * 1000,
+        'dec_computation_time_msec': np.mean(dec_times) * 1000,
+        'rec_computation_time_msec': np.mean(rec_times) * 1000,
         'wavelet_name': wavelet_name
     }
 
@@ -48,4 +75,5 @@ if __name__ == '__main__':
         wavelet_name='db1',
         num_samples=int(1e6)
     )
-    print(f"Computation time: {result['computation_time_msec']:.1f} milliseconds")
+    print(f"Decomposition time: {result['dec_computation_time_msec']:.1f} milliseconds")
+    print(f"Reconstruction time: {result['rec_computation_time_msec']:.1f} milliseconds")
