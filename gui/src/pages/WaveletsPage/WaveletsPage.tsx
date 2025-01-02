@@ -5,6 +5,7 @@ import Markdown from "../../Markdown/Markdown";
 import wavelets_md from "./wavelets.md?raw";
 import { useCoeffSizes } from "./useCoeffSizes";
 import { WaveletBasisPlot } from "./WaveletBasisPlot";
+import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
 
 type WaveletsPageProps = {
   width: number;
@@ -13,7 +14,7 @@ type WaveletsPageProps = {
 
 const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({ width, height }) => {
   return (
-    <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
+    <MarkdownWrapper width={width} height={height}>
       <Markdown source={wavelets_md}
         divHandler={({ className, props, children }) => {
           if (className === "main") {
@@ -22,7 +23,7 @@ const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({ width, height }) =
           return <div {...props}>{children}</div>;
         }}
       />
-    </div>
+    </MarkdownWrapper>
   );
 }
 

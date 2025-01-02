@@ -5,6 +5,8 @@ import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
 import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
 import Markdown from "../../Markdown/Markdown";
 import compression_md from "./compression.md?raw";
+import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
+import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
 
 type CompressionPageProps = {
   width: number;
@@ -13,7 +15,7 @@ type CompressionPageProps = {
 
 const CompressionPage: FunctionComponent<CompressionPageProps> = ({ width, height }) => {
   return (
-    <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
+    <MarkdownWrapper width={width} height={height}>
       <Markdown source={compression_md}
         divHandler={({ className, props, children }) => {
           if (className === "main") {
@@ -22,7 +24,7 @@ const CompressionPage: FunctionComponent<CompressionPageProps> = ({ width, heigh
           return <div {...props}>{children}</div>;
         }}
       />
-    </div>
+    </MarkdownWrapper>
   );
 }
 
@@ -36,7 +38,7 @@ const CompressionPageChild: FunctionComponent<CompressionPageChildProps> = ({ wi
   const [filter, setFilter] = useState<Filter>("none");
   const { filtLowcut, filtHighcut } = parseFilter(filter);
   const code = `
-${removeEverythingAfter(code1, "if __name__ == '__main__':")}
+${removeMainSectionFromPy(code1)}
 code1(
     wavelet_name='${waveletName}',
     num_samples=5000,
@@ -120,14 +122,6 @@ const parseFilter = (filter: Filter) => {
     throw new Error(`Invalid filter: ${filter}`);
   }
 }
-
-const removeEverythingAfter = (s: string, substr: string) => {
-  const i = s.indexOf(substr);
-  if (i === -1) {
-    return s;
-  }
-  return s.slice(0, i);
-};
 
 type CompressionRatioVsNRMSEPlotProps = {
   nrmses: number[];

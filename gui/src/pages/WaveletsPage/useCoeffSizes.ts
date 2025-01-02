@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { pyodideRun } from "../../pyodide/pyodideRun";
 import { getCachedValue, setCachedValue } from "../../utils/indexedDbCache";
+import wavelets_py from "./wavelets.py?raw";
+import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
 
 const CACHE_VERSION = 1;
 const CACHE_KEY_PREFIX = "pyodideResult";
@@ -17,17 +19,19 @@ const codeHash = (code: string) => {
   return hash;
 }
 
-export const usePyodideResult = (code: string) => {
+export const usePyodideResult = (code: string, o: {readCache: boolean, writeCache: boolean}={readCache: true, writeCache: true}) => {
   const [result, setResult] = useState<any>(undefined);
   useEffect(() => {
     let canceled = false;
     const run = async () => {
       setResult(undefined);
       const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(code)}`;
-      const x = await getCachedValue(key);
-      if (x) {
-        setResult(x);
-        return;
+      if (o.readCache) {
+        const x = await getCachedValue(key);
+        if (x) {
+          setResult(x);
+          return;
+        }
       }
       const result = await pyodideRun(code, {
         onStdout(data) {
@@ -40,33 +44,27 @@ export const usePyodideResult = (code: string) => {
           console.log("status", status);
         },
       });
-      if (!canceled) {
+      if (canceled) return;
+      if (o.writeCache) {
         await setCachedValue(key, result);
-        setResult(result);
       }
+      if (canceled) return;
+      setResult(result);
     };
     run();
     return () => {
       canceled = true;
     };
-  }, [code]);
+  }, [code, o.readCache, o.writeCache]);
   return result;
 };
 
 export const useCoeffSizes = (wavelet: string, n: number): number[] | undefined => {
   const code = `
-import pywt
-import numpy as np
-import random
-wavelet_extension_mode = 'symmetric'
-# Create a signal
-x = np.random.randn(${n})
-# Perform the decomposition
-coeffs = pywt.wavedec(x, '${wavelet}', mode=wavelet_extension_mode)
-coeff_sizes = [len(x) for x in coeffs]
+${removeMainSectionFromPy(wavelets_py)}
+coeff_sizes = get_coeff_sizes(n=${n}, wavelet='${wavelet}')
 {'coeff_sizes': coeff_sizes}
 `;
-console.log(code);
   const r = usePyodideResult(code);
   return r ? r.coeff_sizes : undefined;
-};
+}

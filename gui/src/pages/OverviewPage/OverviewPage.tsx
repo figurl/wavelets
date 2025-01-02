@@ -1,20 +1,19 @@
-import { FunctionComponent } from 'react'
-import Markdown from '../../Markdown/Markdown'
-import overviewMd from './overview.md?raw'
+import { FunctionComponent } from "react";
+import Markdown from "../../Markdown/Markdown";
+import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
+import overviewMd from "./overview.md?raw";
 
 type Props = {
-    width: number
-    height: number
-}
+  width: number;
+  height: number;
+};
 
-const OverviewPage: FunctionComponent<Props> = ({width, height}) => {
-    return (
-        <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
-            <Markdown
-                source={overviewMd}
-            />
-        </div>
-    )
-}
+const OverviewPage: FunctionComponent<Props> = ({ width, height }) => {
+  return (
+    <MarkdownWrapper width={Math.min(800, width)} height={height}>
+      <Markdown source={overviewMd} />
+    </MarkdownWrapper>
+  );
+};
 
-export default OverviewPage
+export default OverviewPage;

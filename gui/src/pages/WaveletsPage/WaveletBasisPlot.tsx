@@ -1,6 +1,8 @@
 import { FunctionComponent, useMemo } from "react";
 import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
 import { usePyodideResult } from "./useCoeffSizes";
+import wavelets_py from "./wavelets.py?raw";
+import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
 
 type WaveletBasisPlotProps = {
   wavelet: string;
@@ -14,48 +16,40 @@ export const WaveletBasisPlot: FunctionComponent<WaveletBasisPlotProps> = ({
   level,
 }) => {
   const code = `
-import pywt
-import numpy as np
-
-coeff_sizes = ${JSON.stringify(coeffSizes)}
-wavelet_extension_mode = 'symmetric'
-
-basis_functions = []
-for offset in range(${coeffSizes[level]}):
-  coeffs = [];
-  for i in range(len(coeff_sizes)):
-    coeffs.append(np.zeros(coeff_sizes[i]))
-  coeffs[${level}][offset] = 1
-  y = pywt.waverec(coeffs, '${wavelet}', mode=wavelet_extension_mode)
-  basis_functions.append(y.tolist())
-{'basis_functions': basis_functions}
+${removeMainSectionFromPy(wavelets_py)}
+basis_wavelets = get_basis_wavelets(
+  coeff_sizes=${JSON.stringify(coeffSizes)},
+  level=${level},
+  wavelet='${wavelet}'
+)
+{'basis_wavelets': basis_wavelets}
 `;
   const r = usePyodideResult(code);
-  if (!r?.basis_functions) {
+  if (!r?.basis_wavelets) {
     return <div>Loading...</div>;
   }
   return (
     <div style={{ width: 400 }}>
-      <WaveletBasisPlotChild level={level} basisFunctions={r.basis_functions} />
+      <WaveletBasisPlotChild level={level} basisWavelets={r.basis_wavelets} />
     </div>
   );
 };
 
 type WaveletBasisPlotChildProps = {
   level: number;
-  basisFunctions: number[][];
+  basisWavelets: number[][];
 };
 
 const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
-  basisFunctions,
+  basisWavelets,
   level,
 }) => {
   const width = 400;
   const height = 300;
   const { data, layout } = useMemo(() => {
-    const centerIndex = Math.floor(basisFunctions.length / 2);
+    const centerIndex = Math.floor(basisWavelets.length / 2);
     const data = [
-      ...basisFunctions.map((y) => {
+      ...basisWavelets.map((y) => {
         return {
           x: y.map((_, j) => j),
           y,
@@ -68,8 +62,8 @@ const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
         };
       }),
       {
-        x: basisFunctions[centerIndex].map((_, j) => j),
-        y: basisFunctions[centerIndex],
+        x: basisWavelets[centerIndex].map((_, j) => j),
+        y: basisWavelets[centerIndex],
         type: "scatter",
         mode: "lines",
         line: {
@@ -101,6 +95,6 @@ const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
       showlegend: false,
     };
     return { data, layout };
-  }, [basisFunctions, level]);
+  }, [basisWavelets, level]);
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };
