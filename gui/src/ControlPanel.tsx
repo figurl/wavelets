@@ -8,8 +8,6 @@ export type Page =
   | "test";
 
 type ControlPanelProps = {
-  width: number;
-  height: number;
   page: Page;
   setPage: (page: Page) => void;
 };
@@ -214,8 +212,6 @@ export const waveletNameChoices = [
 export type Filter = "none" | "bandpass 300-6000 Hz" | "highpass 300 Hz";
 
 const ControlPanel: FunctionComponent<ControlPanelProps> = ({
-  width,
-  height,
   page,
   setPage,
 }) => {
@@ -223,12 +219,17 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
   return (
     <div
       style={{
-        width,
-        height,
         overflowY: "auto",
         padding: "15px",
       }}
     >
+      <style>
+        {`
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}
+      </style>
       <div
         style={{ fontSize: "1.2em", fontWeight: "bold", marginBottom: "15px" }}
       >
@@ -252,15 +253,15 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
               cursor: "pointer",
               backgroundColor:
                 page === item.id
-                  ? "#e0e0e0"
+                  ? "#e3eaff"
                   : hoveredId === item.id
-                    ? "#f0f0f0"
+                    ? "#e8edff"
                     : "transparent",
               borderRadius: "4px",
               transition: "all 0.2s ease",
               borderLeft:
                 page === item.id
-                  ? "3px solid #007bff"
+                  ? "3px solid #2962ff"
                   : "3px solid transparent",
             }}
           >

@@ -3,7 +3,6 @@ import "./App.css";
 
 import { FunctionComponent, useState } from "react";
 import ControlPanel, { Page } from "./ControlPanel";
-import Splitter from "./components/Splitter";
 import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
 import ComputeTimePage from "./pages/ComputeTimePage/ComputeTimePage";
@@ -41,18 +40,37 @@ type MainWindowProps = {
 };
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
-  const initialControlPanelWidth = Math.min(250, width / 2);
   const [page, setPage] = useState<Page>("story");
+  const controlPanelWidth = 200;
   return (
-    <Splitter
-      width={width}
-      height={height}
-      initialPosition={initialControlPanelWidth}
-      direction="horizontal"
+    <div
+      className="app-container"
+      style={{ width, height, overflow: "hidden" }}
     >
-      <ControlPanel width={0} height={0} page={page} setPage={setPage} />
-      <MainWindow2 width={0} height={0} page={page} />
-    </Splitter>
+      <div
+        className="control-panel"
+        style={{
+          position: "absolute",
+          width: controlPanelWidth,
+          height,
+          backgroundColor: "#f0f4ff",
+        }}
+      >
+        <ControlPanel page={page} setPage={setPage} />
+      </div>
+      <div
+        className="main-content"
+        style={{
+          position: "absolute",
+          left: controlPanelWidth,
+          width: width - controlPanelWidth,
+          height,
+          overflowY: "hidden",
+        }}
+      >
+        <MainWindow2 width={width - 250} height={height} page={page} />
+      </div>
+    </div>
   );
 };
 
