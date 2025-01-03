@@ -30,7 +30,11 @@ basis_wavelets = get_basis_wavelets(
   }
   return (
     <div style={{ width: 400 }}>
-      <WaveletBasisPlotChild level={level} basisWavelets={r.basis_wavelets} waveletName={wavelet} />
+      <WaveletBasisPlotChild
+        level={level}
+        basisWavelets={r.basis_wavelets}
+        waveletName={wavelet}
+      />
     </div>
   );
 };
@@ -83,15 +87,15 @@ const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
         r: 20,
         t: 70,
         b: 60,
-        pad: 0
+        pad: 0,
       },
       xaxis: {
-        automargin: false
+        automargin: false,
       },
       yaxis: {
         automargin: false,
         tickpadding: 5,
-        ticklen: 4
+        ticklen: 4,
       },
       // no legend
       showlegend: false,

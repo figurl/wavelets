@@ -13,15 +13,28 @@ const codeHash = (code: string) => {
   if (code.length === 0) return hash;
   for (let i = 0; i < code.length; i++) {
     const char = code.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
   return hash;
-}
+};
 
-export const usePyodideResult = (code: string | null, o: {readCache?: boolean, writeCache?: boolean, additionalFiles?: {[key: string]: string | {base64: string}}}={readCache: undefined, writeCache: undefined, additionalFiles: undefined}) => {
+export const usePyodideResult = (
+  code: string | null,
+  o: {
+    readCache?: boolean;
+    writeCache?: boolean;
+    additionalFiles?: { [key: string]: string | { base64: string } };
+  } = {
+    readCache: undefined,
+    writeCache: undefined,
+    additionalFiles: undefined,
+  },
+) => {
   const [result, setResult] = useState<any>(undefined);
-  const additionalFilesJson = o.additionalFiles ? JSON.stringify(o.additionalFiles) : undefined;
+  const additionalFilesJson = o.additionalFiles
+    ? JSON.stringify(o.additionalFiles)
+    : undefined;
   useEffect(() => {
     let canceled = false;
     const run = async () => {
@@ -30,7 +43,7 @@ export const usePyodideResult = (code: string | null, o: {readCache?: boolean, w
         return;
       }
       setResult(undefined);
-      const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(JSON.stringify({code, additionalFilesJson}))}`;
+      const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(JSON.stringify({ code, additionalFilesJson }))}`;
       if (o.readCache ?? true) {
         const x = await getCachedValue(key);
         if (x) {
@@ -38,17 +51,21 @@ export const usePyodideResult = (code: string | null, o: {readCache?: boolean, w
           return;
         }
       }
-      const result = await pyodideRun(code, {
-        onStdout(data) {
-          console.log(data);
+      const result = await pyodideRun(
+        code,
+        {
+          onStdout(data) {
+            console.log(data);
+          },
+          onStderr(data) {
+            console.error(data);
+          },
+          onStatus(status) {
+            console.log("status", status);
+          },
         },
-        onStderr(data) {
-          console.error(data);
-        },
-        onStatus(status) {
-          console.log("status", status);
-        },
-      }, additionalFilesJson ? JSON.parse(additionalFilesJson) : undefined);
+        additionalFilesJson ? JSON.parse(additionalFilesJson) : undefined,
+      );
       if (canceled) return;
       if (o.writeCache ?? true) {
         await setCachedValue(key, result);
@@ -64,7 +81,10 @@ export const usePyodideResult = (code: string | null, o: {readCache?: boolean, w
   return result;
 };
 
-export const useCoeffSizes = (wavelet: string, n: number): number[] | undefined => {
+export const useCoeffSizes = (
+  wavelet: string,
+  n: number,
+): number[] | undefined => {
   const code = `
 ${removeMainSectionFromPy(wavelets_py)}
 coeff_sizes = get_coeff_sizes(n=${n}, wavelet='${wavelet}')
@@ -72,4 +92,4 @@ coeff_sizes = get_coeff_sizes(n=${n}, wavelet='${wavelet}')
 `;
   const r = usePyodideResult(code);
   return r ? r.coeff_sizes : undefined;
-}
+};

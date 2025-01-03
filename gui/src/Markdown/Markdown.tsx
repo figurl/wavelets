@@ -23,7 +23,11 @@ type Props = {
   runCodeReady?: boolean;
   files?: { [name: string]: string };
   linkTarget?: string;
-  divHandler?: (args: { className: string | undefined; props: any, children: any }) => JSX.Element;
+  divHandler?: (args: {
+    className: string | undefined;
+    props: any;
+    children: any;
+  }) => JSX.Element;
 };
 
 const Markdown: FunctionComponent<Props> = ({
@@ -33,7 +37,7 @@ const Markdown: FunctionComponent<Props> = ({
   runCodeReady,
   files,
   linkTarget,
-  divHandler
+  divHandler,
 }) => {
   const components: Partial<
     Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents
@@ -70,10 +74,7 @@ const Markdown: FunctionComponent<Props> = ({
               )}
             </div>
             {/* @ts-expect-error - SyntaxHighlighter has incompatible types with React 18.3 */}
-            <SyntaxHighlighter
-              style={darcula}
-              language={match[1]}
-            >
+            <SyntaxHighlighter style={darcula} language={match[1]}>
               {String(children).replace(/\n$/, "")}
             </SyntaxHighlighter>
           </>

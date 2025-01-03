@@ -90,19 +90,21 @@ export const FilterSelector: FunctionComponent<FilterSelectorProps> = ({
   );
 };
 
-export type CompressionPlotMode = 'default' | 'residual';
+export type CompressionPlotMode = "default" | "residual";
 
-const compressionPlotModeChoices: CompressionPlotMode[] = ['default', 'residual'];
+const compressionPlotModeChoices: CompressionPlotMode[] = [
+  "default",
+  "residual",
+];
 
 type CompressionPlotModeSelectorProps = {
   mode: CompressionPlotMode;
   setMode: (mode: CompressionPlotMode) => void;
 };
 
-export const CompressionPlotModeSelector: FunctionComponent<CompressionPlotModeSelectorProps> = ({
-  mode,
-  setMode,
-}) => {
+export const CompressionPlotModeSelector: FunctionComponent<
+  CompressionPlotModeSelectorProps
+> = ({ mode, setMode }) => {
   return (
     <div>
       <label>Plot mode:&nbsp;</label>
@@ -112,7 +114,7 @@ export const CompressionPlotModeSelector: FunctionComponent<CompressionPlotModeS
       >
         {compressionPlotModeChoices.map((name) => (
           <option key={name} value={name}>
-            {name === 'default' ? 'Original & Compressed' : 'Residual'}
+            {name === "default" ? "Original & Compressed" : "Residual"}
           </option>
         ))}
       </select>
@@ -120,7 +122,7 @@ export const CompressionPlotModeSelector: FunctionComponent<CompressionPlotModeS
   );
 };
 
-export type SignalType = 'gaussian_noise' | 'real_ephys_1';
+export type SignalType = "gaussian_noise" | "real_ephys_1";
 
 const signalTypeChoices: SignalType[] = ["gaussian_noise", "real_ephys_1"];
 

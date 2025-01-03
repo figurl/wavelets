@@ -3,11 +3,19 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "prettier": {
+    "tabWidth": 2,
+    "semi": true,
+    "experimentalTernaries": false,
+    "bracketSameLine": false,
+    "arrowParens": "always"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -53,6 +61,7 @@
     "eslint": "^9.15.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "prettier": "^3.3.2",
     "globals": "^15.12.0",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.15.0",

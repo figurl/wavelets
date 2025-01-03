@@ -51,12 +51,7 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
       initialPosition={initialControlPanelWidth}
       direction="horizontal"
     >
-      <ControlPanel
-        width={0}
-        height={0}
-        page={page}
-        setPage={setPage}
-      />
+      <ControlPanel width={0} height={0} page={page} setPage={setPage} />
       <MainWindow2 width={0} height={0} page={page} />
     </Splitter>
   );
@@ -74,47 +69,17 @@ const MainWindow2: FunctionComponent<MainWindow2Props> = ({
   page,
 }) => {
   if (page === "overview") {
-    return (
-      <OverviewPage
-        width={width}
-        height={height}
-      />
-    );
+    return <OverviewPage width={width} height={height} />;
   } else if (page === "wavelets") {
-    return (
-      <WaveletsPage
-        width={width}
-        height={height}
-      />
-    );
+    return <WaveletsPage width={width} height={height} />;
   } else if (page === "compression") {
-    return (
-      <CompressionPage
-        width={width}
-        height={height}
-      />
-    );
+    return <CompressionPage width={width} height={height} />;
   } else if (page === "compute_time") {
-    return (
-      <ComputeTimePage
-        width={width}
-        height={height}
-      />
-    );
+    return <ComputeTimePage width={width} height={height} />;
   } else if (page === "test") {
-    return (
-      <TestPage
-        width={width}
-        height={height}
-      />
-    );
+    return <TestPage width={width} height={height} />;
   } else if (page === "story") {
-    return (
-      <StoryPage
-        width={width}
-        height={height}
-      />
-    )
+    return <StoryPage width={width} height={height} />;
   } else {
     return <div>Unknown page: {page}</div>;
   }

@@ -5,7 +5,10 @@ import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
 import { WaveletBasisPlot } from "../WaveletsPage/WaveletBasisPlot";
 import { useCoeffSizes } from "../WaveletsPage/useCoeffSizes";
 import storyMd from "./story.md?raw";
-import { CompressionPlot, useCompressionResult } from "../CompressionPage/CompressionPage";
+import {
+  CompressionPlot,
+  useCompressionResult,
+} from "../CompressionPage/CompressionPage";
 import { WaveletName } from "../../ControlPanel";
 import { SignalType } from "../CompressionPage/selectors";
 import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
@@ -31,16 +34,25 @@ const StoryPage: FunctionComponent<Props> = ({ width, height }) => {
         const levels = props.levels.split(",").map((s: string) => parseInt(s));
         const numSamples = parseInt(props.num_samples);
         return (
-          <WaveletBasisPlotWrapper waveletName={waveletName} levels={levels} numSamples={numSamples} />
+          <WaveletBasisPlotWrapper
+            waveletName={waveletName}
+            levels={levels}
+            numSamples={numSamples}
+          />
         );
-      }
-      else if (className === "compression-plot") {
+      } else if (className === "compression-plot") {
         const waveletName = props.wavelet_name;
         const numSamples = parseInt(props.num_samples);
-        const filtLowcut = props.filt_lowcut ? parseFloat(props.filt_lowcut) : undefined;
-        const filtHighcut = props.filt_highcut ? parseFloat(props.filt_highcut) : undefined;
+        const filtLowcut = props.filt_lowcut
+          ? parseFloat(props.filt_lowcut)
+          : undefined;
+        const filtHighcut = props.filt_highcut
+          ? parseFloat(props.filt_highcut)
+          : undefined;
         const signalType = props.signal_type;
-        const nrmses = props.nrmses.split(",").map((s: string) => parseFloat(s));
+        const nrmses = props.nrmses
+          .split(",")
+          .map((s: string) => parseFloat(s));
         return (
           <CompressionPlotWrapper
             waveletName={waveletName}
@@ -50,7 +62,7 @@ const StoryPage: FunctionComponent<Props> = ({ width, height }) => {
             signalType={signalType}
             nrmses={nrmses}
           />
-        )
+        );
       }
       return <div {...props}>{children}</div>;
     };
@@ -98,14 +110,15 @@ type CompressionPlotWrapperProps = {
   nrmses: number[];
 };
 
-
-const CompressionPlotWrapper: FunctionComponent<CompressionPlotWrapperProps> = ({
+const CompressionPlotWrapper: FunctionComponent<
+  CompressionPlotWrapperProps
+> = ({
   waveletName,
   numSamples,
   filtLowcut,
   filtHighcut,
   signalType,
-  nrmses
+  nrmses,
 }) => {
   const result = useCompressionResult({
     waveletName: waveletName as WaveletName,
@@ -113,8 +126,8 @@ const CompressionPlotWrapper: FunctionComponent<CompressionPlotWrapperProps> = (
     filtLowcut,
     filtHighcut,
     signalType: signalType as SignalType,
-    nrmses
-  })
+    nrmses,
+  });
 
   const width = useDocumentWidth();
 
@@ -130,22 +143,22 @@ const CompressionPlotWrapper: FunctionComponent<CompressionPlotWrapperProps> = (
 
   return (
     <>
-    {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
-      <CompressionPlot
-        key={i}
-        title={`NRMSE: ${
-          Math.round(nrmse * 100) / 100
-        }; Compression ratio: ${compression_ratio.toFixed(2)}`}
-        samplingFrequency={result.sampling_frequency}
-        original={result.original.slice(0, numSamples)}
-        compressed={compressed.slice(0, numSamples)}
-        width={width - 30} // leave room for scrollbar
-        height={400}
-        mode={plotMode}
-      />
-    ))}
+      {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
+        <CompressionPlot
+          key={i}
+          title={`NRMSE: ${
+            Math.round(nrmse * 100) / 100
+          }; Compression ratio: ${compression_ratio.toFixed(2)}`}
+          samplingFrequency={result.sampling_frequency}
+          original={result.original.slice(0, numSamples)}
+          compressed={compressed.slice(0, numSamples)}
+          width={width - 30} // leave room for scrollbar
+          height={400}
+          mode={plotMode}
+        />
+      ))}
     </>
-  )
-}
+  );
+};
 
 export default StoryPage;

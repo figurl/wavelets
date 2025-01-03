@@ -30,16 +30,17 @@ export type PyodideRunSettings = Partial<{
 export type MessageToPyodideWorker = {
   type: "run";
   code: string;
-  additionalFiles?: {[filename: string]: string | {base64: string}}; // Map of filename to file content
+  additionalFiles?: { [filename: string]: string | { base64: string } }; // Map of filename to file content
 };
 
 export const isMessageToPyodideWorker = (
-  x: any
+  x: any,
 ): x is MessageToPyodideWorker => {
   if (!baseObjectCheck(x)) return false;
   if (x.type !== "run") return false;
   if (typeof x.code !== "string") return false;
-  if (x.additionalFiles !== undefined && typeof x.additionalFiles !== "object") return false;
+  if (x.additionalFiles !== undefined && typeof x.additionalFiles !== "object")
+    return false;
   return true;
 };
 
@@ -53,12 +54,12 @@ export type MessageFromPyodideWorker =
       status: InterpreterStatus;
     }
   | {
-    type: "setResultJson";
-    resultJson: string;
-  }
+      type: "setResultJson";
+      resultJson: string;
+    };
 
 export const isMessageFromPyodideWorker = (
-  x: any
+  x: any,
 ): x is MessageFromPyodideWorker => {
   if (!baseObjectCheck(x)) return false;
   if (x.type === "stdout") return x.data !== undefined;

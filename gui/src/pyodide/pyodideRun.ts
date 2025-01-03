@@ -26,7 +26,7 @@ type PyodideCallbacks = {
  */
 type QueuedTask = {
   code: string;
-  additionalFiles?: {[filename: string]: string | {base64: string}};
+  additionalFiles?: { [filename: string]: string | { base64: string } };
   callbacks: PyodideCallbacks;
   resolve: (result: any) => void;
   reject: (error: Error) => void;
@@ -82,7 +82,9 @@ class PyodideWorkerManager {
         }
       }
       if (msg.type === "setResultJson") {
-        this.currentResult = msg.resultJson ? JSON.parse(msg.resultJson) : msg.resultJson;
+        this.currentResult = msg.resultJson
+          ? JSON.parse(msg.resultJson)
+          : msg.resultJson;
       }
     };
 
@@ -125,7 +127,7 @@ class PyodideWorkerManager {
     const msg: MessageToPyodideWorker = {
       type: "run",
       code: nextTask.code,
-      additionalFiles: nextTask.additionalFiles
+      additionalFiles: nextTask.additionalFiles,
     };
     this.worker.postMessage(msg);
   }
@@ -147,7 +149,11 @@ class PyodideWorkerManager {
    * @param callbacks Callbacks for handling output and status
    * @returns Promise that resolves when execution completes
    */
-  public queueTask(code: string, callbacks: PyodideCallbacks, additionalFiles?: {[filename: string]: string | {base64: string}}): Promise<void> {
+  public queueTask(
+    code: string,
+    callbacks: PyodideCallbacks,
+    additionalFiles?: { [filename: string]: string | { base64: string } },
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       this.taskQueue.push({
         code,
@@ -171,7 +177,7 @@ class PyodideWorkerManager {
 export const pyodideRun = async (
   code: string,
   callbacks: PyodideCallbacks,
-  additionalFiles?: {[filename: string]: string | {base64: string}}
+  additionalFiles?: { [filename: string]: string | { base64: string } },
 ): Promise<void> => {
   const manager = PyodideWorkerManager.getInstance();
   return manager.queueTask(code, callbacks, additionalFiles);

@@ -1,6 +1,12 @@
 import { FunctionComponent, useState } from "react";
 
-export type Page = "overview" | "story" | "wavelets" | "compression" | "compute_time" | "test";
+export type Page =
+  | "overview"
+  | "story"
+  | "wavelets"
+  | "compression"
+  | "compute_time"
+  | "test";
 
 type ControlPanelProps = {
   width: number;
@@ -224,7 +230,9 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
         padding: "15px",
       }}
     >
-      <div style={{ fontSize: '1.2em', fontWeight: 'bold', marginBottom: '15px' }}>
+      <div
+        style={{ fontSize: "1.2em", fontWeight: "bold", marginBottom: "15px" }}
+      >
         Contents
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -234,33 +242,36 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
           { id: "wavelets", label: "Wavelets" },
           { id: "compression", label: "Compression" },
           { id: "compute_time", label: "Compute Time" },
-          { id: "test", label: "Test" }
-        ].map(item => (
+          { id: "test", label: "Test" },
+        ].map((item) => (
           <div
-              key={item.id}
-              onClick={() => setPage(item.id as Page)}
-              onMouseEnter={() => setHoveredId(item.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              style={{
-                padding: "8px 12px",
-                cursor: "pointer",
-                backgroundColor: page === item.id
+            key={item.id}
+            onClick={() => setPage(item.id as Page)}
+            onMouseEnter={() => setHoveredId(item.id)}
+            onMouseLeave={() => setHoveredId(null)}
+            style={{
+              padding: "8px 12px",
+              cursor: "pointer",
+              backgroundColor:
+                page === item.id
                   ? "#e0e0e0"
                   : hoveredId === item.id
                     ? "#f0f0f0"
                     : "transparent",
-                borderRadius: "4px",
-                transition: "all 0.2s ease",
-                borderLeft: page === item.id ? "3px solid #007bff" : "3px solid transparent"
-              }}
-            >
-              {item.label}
+              borderRadius: "4px",
+              transition: "all 0.2s ease",
+              borderLeft:
+                page === item.id
+                  ? "3px solid #007bff"
+                  : "3px solid transparent",
+            }}
+          >
+            {item.label}
           </div>
         ))}
       </div>
     </div>
   );
 };
-
 
 export default ControlPanel;

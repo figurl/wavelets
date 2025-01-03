@@ -13,20 +13,24 @@ type Props = {
 
 const TestPage: FunctionComponent<Props> = ({ width, height }) => {
   const handleTest = useCallback(async () => {
-    const x = await pyodideRun(test_py, {
-      onStdout(data) {
-        console.log(data);
+    const x = await pyodideRun(
+      test_py,
+      {
+        onStdout(data) {
+          console.log(data);
+        },
+        onStderr(data) {
+          console.error(data);
+        },
+        onStatus(status) {
+          console.log("status", status);
+        },
       },
-      onStderr(data) {
-        console.error(data);
+      {
+        "RemoteFile.py": RemoteFile_py,
       },
-      onStatus(status) {
-        console.log("status", status);
-      },
-    }, {
-        'RemoteFile.py': RemoteFile_py
-    });
-    console.log('--- x', x);
+    );
+    console.log("--- x", x);
   }, []);
   return (
     <MarkdownWrapper width={Math.min(800, width)} height={height}>

@@ -19,7 +19,15 @@ const ComputeTimePage: FunctionComponent<ComputeTimePageProps> = ({
   height,
 }) => {
   const divHandler = useMemo(() => {
-    return ({ className, props, children }: { className: string | undefined; props: any; children: any }) => {
+    return ({
+      className,
+      props,
+      children,
+    }: {
+      className: string | undefined;
+      props: any;
+      children: any;
+    }) => {
       if (className === "main") {
         return <ComputeTimePageChild />;
       }
@@ -28,10 +36,7 @@ const ComputeTimePage: FunctionComponent<ComputeTimePageProps> = ({
   }, []);
   return (
     <MarkdownWrapper width={width} height={height}>
-      <Markdown
-        source={compute_time_md}
-        divHandler={divHandler}
-      />
+      <Markdown source={compute_time_md} divHandler={divHandler} />
     </MarkdownWrapper>
   );
 };
@@ -52,17 +57,21 @@ const waveletOptions = {
   option7: ["sym4", "sym8", "sym12", "sym16"],
 };
 
-const ComputeTimePageChild: FunctionComponent<ComputeTimePageChildProps> = () => {
+const ComputeTimePageChild: FunctionComponent<
+  ComputeTimePageChildProps
+> = () => {
   const [numSamples, setNumSamples] = useState(1e6);
-  const [selectedWavelets, setSelectedWavelets] = useState<keyof typeof waveletOptions>("option2");
+  const [selectedWavelets, setSelectedWavelets] =
+    useState<keyof typeof waveletOptions>("option2");
   const [readCache, setReadCache] = useState(true);
   const width = useDocumentWidth();
 
   const toggleCache = useCallback(() => {
-    setReadCache(prev => !prev);
+    setReadCache((prev) => !prev);
   }, []);
 
-  const pythonCode = useMemo(() => `
+  const pythonCode = useMemo(
+    () => `
 ${removeMainSectionFromPy(code1)}
 results = [
   benchmark_compute_time(
@@ -72,9 +81,12 @@ results = [
   for wavelet_name in ${JSON.stringify(waveletOptions[selectedWavelets])}
 ]
 results
-`, [numSamples, selectedWavelets]);
+`,
+    [numSamples, selectedWavelets],
+  );
 
-  const pythonCodeForDisplay = useMemo(() => `
+  const pythonCodeForDisplay = useMemo(
+    () => `
 ${removeMainSectionFromPy(code1)}
 results = [
   benchmark_compute_time(
@@ -101,8 +113,9 @@ plt.title('Computation Time Comparison')
 plt.xticks(x, wavelet_names)
 plt.legend()
 plt.show()
-`, [numSamples, selectedWavelets]);
-
+`,
+    [numSamples, selectedWavelets],
+  );
 
   const results = usePyodideResult(pythonCode, { readCache, writeCache: true });
 
@@ -112,21 +125,32 @@ plt.show()
 
   return (
     <div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "20px",
+          alignItems: "center",
+        }}
+      >
         <NumSamplesSelector
           numSamples={numSamples}
           setNumSamples={setNumSamples}
         />
         <div>
           <label>Wavelets:&nbsp;</label>
-            <select
+          <select
             value={selectedWavelets}
-            onChange={(e) => setSelectedWavelets(e.target.value as keyof typeof waveletOptions)}
-            >
+            onChange={(e) =>
+              setSelectedWavelets(e.target.value as keyof typeof waveletOptions)
+            }
+          >
             {Object.entries(waveletOptions).map(([key, value]) => (
-              <option key={key} value={key}>{value.join(", ")}</option>
+              <option key={key} value={key}>
+                {value.join(", ")}
+              </option>
             ))}
-            </select>
+          </select>
         </div>
         <button
           onClick={toggleCache}
@@ -205,14 +229,14 @@ const ComputationTimePlot: FunctionComponent<ComputationTimePlotProps> = ({
         tickpadding: 5,
         ticklen: 4,
       },
-      barmode: 'group',
+      barmode: "group",
     };
     return { data, layout };
   }, [results, width, height]);
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };
 
-const numSamplesChoices = [1e6, 2e6, 5e6, 1e7]
+const numSamplesChoices = [1e6, 2e6, 5e6, 1e7];
 
 type NumSamplesSelectorProps = {
   numSamples: number;
@@ -242,6 +266,6 @@ const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({
 
 const toScientific = (num: number) => {
   return num.toExponential(1);
-}
+};
 
 export default ComputeTimePage;

@@ -11,9 +11,9 @@ let pyodide: PyodideInterface | null = null;
 // Custom fetch with caching
 const fetchWithCache = async (originalFetch: any, url: string) => {
   // Try to get from memory cache first
-  const cachedResponse = await caches.open('pyodide-cache').then(cache =>
-    cache.match(url)
-  );
+  const cachedResponse = await caches
+    .open("pyodide-cache")
+    .then((cache) => cache.match(url));
 
   if (cachedResponse) {
     console.info(`Using cached response for ${url}`);
@@ -23,7 +23,7 @@ const fetchWithCache = async (originalFetch: any, url: string) => {
   // If not in cache, fetch and cache
   const response = await originalFetch(url);
   if (response.ok) {
-    const cache = await caches.open('pyodide-cache');
+    const cache = await caches.open("pyodide-cache");
     // Clone the response since we can only use it once
     await cache.put(url, response.clone());
   }
@@ -39,7 +39,7 @@ const loadPyodideInstance = async () => {
     self.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input.toString();
       // Only cache Pyodide-related files
-      if (url.includes('cdn.jsdelivr.net/pyodide')) {
+      if (url.includes("cdn.jsdelivr.net/pyodide")) {
         return fetchWithCache(originalFetch, url);
       }
       return originalFetch(input, init);
@@ -94,8 +94,11 @@ const setStatus = (status: InterpreterStatus) => {
 };
 
 const sendResult = (result: any) => {
-  sendMessageToMain({ type: "setResultJson", resultJson: JSON.stringify(result) });
-}
+  sendMessageToMain({
+    type: "setResultJson",
+    resultJson: JSON.stringify(result),
+  });
+};
 
 self.onmessage = async (e) => {
   // if (isMonacoWorkerNoise(e.data)) {
@@ -109,7 +112,7 @@ self.onmessage = async (e) => {
 
 const run = async (
   code: string,
-  additionalFiles?: {[filename: string]: string | {base64: string}}
+  additionalFiles?: { [filename: string]: string | { base64: string } },
 ) => {
   setStatus("loading");
   try {
@@ -139,8 +142,7 @@ const run = async (
         for (const [filename, content] of Object.entries(additionalFiles)) {
           if (typeof content === "string") {
             pyodide.FS.writeFile(filename, content);
-          }
-          else {
+          } else {
             const b64 = content.base64;
             const binary = atob(b64);
             const bytes = new Uint8Array(binary.length);

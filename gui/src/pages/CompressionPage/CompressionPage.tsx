@@ -10,7 +10,15 @@ import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
 import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
 import compression_md from "./compression.md?raw";
 import compression_py from "./compression.py?raw";
-import { CompressionPlotMode, CompressionPlotModeSelector, FilterSelector, NumSamplesSelector, SignalType, SignalTypeSelector, WaveletNameSelector } from "./selectors";
+import {
+  CompressionPlotMode,
+  CompressionPlotModeSelector,
+  FilterSelector,
+  NumSamplesSelector,
+  SignalType,
+  SignalTypeSelector,
+  WaveletNameSelector,
+} from "./selectors";
 
 type CompressionPageProps = {
   width: number;
@@ -58,7 +66,14 @@ export const useCompressionResult = (o: {
   signalType: SignalType;
   nrmses: number[];
 }) => {
-  const { waveletName, numSamples, filtLowcut, filtHighcut, signalType, nrmses } = o;
+  const {
+    waveletName,
+    numSamples,
+    filtLowcut,
+    filtHighcut,
+    signalType,
+    nrmses,
+  } = o;
   const code = `${removeMainSectionFromPy(compression_py)}
 test_compression(
     wavelet_name='${waveletName}',
@@ -71,7 +86,7 @@ test_compression(
 `;
   const signalFile: ArrayBuffer | null | undefined = useSignalFile(
     signalType,
-    numSamples
+    numSamples,
   );
   const additionalFiles = useMemo(() => {
     if (signalFile === undefined) return undefined;
@@ -98,10 +113,10 @@ test_compression(
     additionalFiles !== undefined ? code : null,
     {
       additionalFiles,
-    }
+    },
   );
   return result;
-}
+};
 
 const nrmses = [0.1, 0.2, 0.4, 0.6, 0.8];
 
@@ -122,7 +137,7 @@ const CompressionPageChild: FunctionComponent<
     filtLowcut,
     filtHighcut,
     signalType,
-    nrmses
+    nrmses,
   });
 
   if (result === null) {
@@ -160,7 +175,7 @@ const CompressionPageChild: FunctionComponent<
       <CompressionRatioVsNRMSEPlot
         nrmses={result.compressed.map(({ nrmse }) => nrmse)}
         compressionRatios={result.compressed.map(
-          ({ compression_ratio }) => compression_ratio
+          ({ compression_ratio }) => compression_ratio,
         )}
         width={Math.min(width, 600)}
         height={300}
@@ -185,10 +200,10 @@ const CompressionPageChild: FunctionComponent<
 
 const useSignalFile = (
   signalType: SignalType,
-  numSamples: number
+  numSamples: number,
 ): ArrayBuffer | null | undefined => {
   const [signalFile, setSignalFile] = useState<ArrayBuffer | null | undefined>(
-    undefined
+    undefined,
   );
   useEffect(() => {
     let canceled = false;
@@ -318,35 +333,39 @@ export const CompressionPlot: FunctionComponent<CompressionPlotProps> = ({
   mode = "default",
 }) => {
   const { data, layout } = useMemo(() => {
-    const timestamps = timestampsForSignal(original.length, samplingFrequency).map(
-      (t) => t * 1000
-    ); // milliseconds
+    const timestamps = timestampsForSignal(
+      original.length,
+      samplingFrequency,
+    ).map((t) => t * 1000); // milliseconds
 
-    const data = mode === "default" ? [
-      {
-        x: timestamps,
-        y: original,
-        type: "scatter",
-        mode: "lines",
-        name: "Original",
-      },
-      {
-        x: timestamps,
-        y: compressed,
-        type: "scatter",
-        mode: "lines",
-        name: "Compressed",
-      },
-    ] : [
-      {
-        x: timestamps,
-        y: original.map((v, i) => v - compressed[i]),
-        type: "scatter",
-        mode: "lines",
-        line: { color: 'green' },
-        name: "Residual",
-      },
-    ];
+    const data =
+      mode === "default"
+        ? [
+            {
+              x: timestamps,
+              y: original,
+              type: "scatter",
+              mode: "lines",
+              name: "Original",
+            },
+            {
+              x: timestamps,
+              y: compressed,
+              type: "scatter",
+              mode: "lines",
+              name: "Compressed",
+            },
+          ]
+        : [
+            {
+              x: timestamps,
+              y: original.map((v, i) => v - compressed[i]),
+              type: "scatter",
+              mode: "lines",
+              line: { color: "green" },
+              name: "Residual",
+            },
+          ];
     const layout = {
       width,
       height,
