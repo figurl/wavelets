@@ -13,15 +13,18 @@ type WaveletsPageProps = {
 };
 
 const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({ width, height }) => {
+  const divHandler = useMemo(() => {
+    return ({ className, props, children }: { className: string | undefined; props: any; children: any }) => {
+      if (className === "main") {
+        return <WaveletsPageChild />;
+      }
+      return <div {...props}>{children}</div>;
+    };
+  }, []);
   return (
     <MarkdownWrapper width={width} height={height}>
       <Markdown source={wavelets_md}
-        divHandler={({ className, props, children }) => {
-          if (className === "main") {
-            return <WaveletsPageChild />;
-          }
-          return <div {...props}>{children}</div>;
-        }}
+        divHandler={divHandler}
       />
     </MarkdownWrapper>
   );

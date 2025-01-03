@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Filter, WaveletName, waveletNameChoices } from "../../ControlPanel";
 import Markdown from "../../Markdown/Markdown";
@@ -8,6 +9,7 @@ import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
 import compression_md from "./compression.md?raw";
 import compression_py from "./compression.py?raw";
 import { RemoteH5File } from "../../remote-h5-file";
+import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
 
 type CompressionPageProps = {
   width: number;
@@ -15,32 +17,37 @@ type CompressionPageProps = {
 };
 
 const CompressionPage: FunctionComponent<CompressionPageProps> = ({ width, height }) => {
+  const divHandler = useMemo(() => {
+    return ({ className, props, children }: { className: string | undefined, props: any, children: any }) => {
+      if (className === "main") {
+        return <CompressionPageChild />;
+      }
+      return <div {...props}>{children}</div>;
+    };
+  }, []);
   return (
     <MarkdownWrapper width={width} height={height}>
       <Markdown source={compression_md}
-        divHandler={({ className, props, children }) => {
-          if (className === "main") {
-            return <CompressionPageChild width={width} />;
-          }
-          return <div {...props}>{children}</div>;
-        }}
+        divHandler={divHandler}
       />
     </MarkdownWrapper>
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type CompressionPageChildProps = {
-  width: number;
+  //
 };
 
 type SignalType = 'gaussian_noise' | 'real_ephys_1';
 
-const CompressionPageChild: FunctionComponent<CompressionPageChildProps> = ({ width }) => {
+const CompressionPageChild: FunctionComponent<CompressionPageChildProps> = () => {
   const [waveletName, setWaveletName] = useState<WaveletName>("db4");
   const [numSamples, setNumSamples] = useState(1024);
   const [filter, setFilter] = useState<Filter>("none");
   const [signalType, setSignalType] = useState<SignalType>("gaussian_noise");
   const { filtLowcut, filtHighcut } = parseFilter(filter);
+  const width = useDocumentWidth();
   const code = `
 ${removeMainSectionFromPy(compression_py)}
 test_compression(

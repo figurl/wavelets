@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import code1 from "./compute_time.py?raw";
 import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
@@ -6,6 +7,7 @@ import Markdown from "../../Markdown/Markdown";
 import compute_time_md from "./compute_time.md?raw";
 import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
 import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
 
 type ComputeTimePageProps = {
   width: number;
@@ -16,23 +18,27 @@ const ComputeTimePage: FunctionComponent<ComputeTimePageProps> = ({
   width,
   height,
 }) => {
+  const divHandler = useMemo(() => {
+    return ({ className, props, children }: { className: string | undefined; props: any; children: any }) => {
+      if (className === "main") {
+        return <ComputeTimePageChild />;
+      }
+      return <div {...props}>{children}</div>;
+    };
+  }, []);
   return (
     <MarkdownWrapper width={width} height={height}>
       <Markdown
         source={compute_time_md}
-        divHandler={({ className, props, children }) => {
-          if (className === "main") {
-            return <ComputeTimePageChild width={width} />;
-          }
-          return <div {...props}>{children}</div>;
-        }}
+        divHandler={divHandler}
       />
     </MarkdownWrapper>
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type ComputeTimePageChildProps = {
-  width: number;
+  //
 };
 
 const waveletOptions = {
@@ -46,12 +52,11 @@ const waveletOptions = {
   option7: ["sym4", "sym8", "sym12", "sym16"],
 };
 
-const ComputeTimePageChild: FunctionComponent<ComputeTimePageChildProps> = ({
-  width,
-}) => {
+const ComputeTimePageChild: FunctionComponent<ComputeTimePageChildProps> = () => {
   const [numSamples, setNumSamples] = useState(1e6);
   const [selectedWavelets, setSelectedWavelets] = useState<keyof typeof waveletOptions>("option2");
   const [readCache, setReadCache] = useState(true);
+  const width = useDocumentWidth();
 
   const toggleCache = useCallback(() => {
     setReadCache(prev => !prev);
