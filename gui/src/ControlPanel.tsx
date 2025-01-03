@@ -1,6 +1,6 @@
 import { FunctionComponent, useState } from "react";
 
-type Page = "overview" | "wavelets" | "compression" | "compute_time";
+type Page = "overview" | "wavelets" | "compression" | "compute_time" | "test";
 
 type ControlPanelProps = {
   width: number;
@@ -232,7 +232,8 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
           { id: "overview", label: "Overview" },
           { id: "wavelets", label: "Wavelets" },
           { id: "compression", label: "Compression" },
-          { id: "compute_time", label: "Compute Time" }
+          { id: "compute_time", label: "Compute Time" },
+          { id: "test", label: "Test" }
         ].map(item => (
           <div
               key={item.id}

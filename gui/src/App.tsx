@@ -8,6 +8,7 @@ import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
 import OverviewPage from "./pages/OverviewPage/OverviewPage";
 import ComputeTimePage from "./pages/ComputeTimePage/ComputeTimePage";
+import TestPage from "./pages/TestPage/TestPage";
 
 function App() {
   const { width, height } = useWindowDimensions();
@@ -41,7 +42,7 @@ type MainWindowProps = {
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
   const initialControlPanelWidth = Math.min(250, width / 2);
-  const [page, setPage] = useState<"overview" | "wavelets" | "compression" | "compute_time">("overview");
+  const [page, setPage] = useState<"overview" | "wavelets" | "compression" | "compute_time" | "test">("overview");
   return (
     <Splitter
       width={width}
@@ -63,7 +64,7 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
 type MainWindow2Props = {
   width: number;
   height: number;
-  page: "overview" | "wavelets" | "compression" | "compute_time";
+  page: "overview" | "wavelets" | "compression" | "compute_time" | "test";
 };
 
 const MainWindow2: FunctionComponent<MainWindow2Props> = ({
@@ -95,6 +96,13 @@ const MainWindow2: FunctionComponent<MainWindow2Props> = ({
   } else if (page === "compute_time") {
     return (
       <ComputeTimePage
+        width={width}
+        height={height}
+      />
+    );
+  } else if (page === "test") {
+    return (
+      <TestPage
         width={width}
         height={height}
       />

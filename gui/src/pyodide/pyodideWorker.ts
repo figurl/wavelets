@@ -125,8 +125,8 @@ const run = async (
     let succeeded = false;
     try {
       const packageFutures = [];
-      // const micropip = pyodide.pyimport("micropip");
-      // packageFutures.push(micropip.install("pyodide-http"));
+      const micropip = pyodide.pyimport("micropip");
+      packageFutures.push(micropip.install("pyodide-http"));
       // packageFutures.push(micropip.install("stanio"));
       packageFutures.push(pyodide.loadPackagesFromImports(script));
       for (const f of packageFutures) {
@@ -152,12 +152,15 @@ const run = async (
         }
       }
 
-      const result = await pyodide.runPythonAsync(script, {
+      let result = await pyodide.runPythonAsync(script, {
         globals: undefined,
         filename: "_script.py",
       });
       succeeded = true;
-      sendResult(result.toJs());
+      if (typeof result === "object") {
+        result = result.toJs();
+      }
+      sendResult(result);
     } catch (e: any) {
       console.error(e);
       sendStderr(e.toString());
