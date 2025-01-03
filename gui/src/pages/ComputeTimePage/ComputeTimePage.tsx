@@ -107,7 +107,7 @@ plt.show()
   const results = usePyodideResult(pythonCode, { readCache, writeCache: true });
 
   if (!results) {
-    return <div>Loading...</div>;
+    return <div>Computing...</div>;
   }
 
   return (
@@ -212,7 +212,7 @@ const ComputationTimePlot: FunctionComponent<ComputationTimePlotProps> = ({
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };
 
-const numSamplesChoices = [1e3, 1e4, 1e5, 1e6];
+const numSamplesChoices = [1e6, 2e6, 5e6, 1e7]
 
 type NumSamplesSelectorProps = {
   numSamples: number;
@@ -232,12 +232,16 @@ const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({
       >
         {numSamplesChoices.map((numSamples) => (
           <option key={numSamples} value={numSamples}>
-            {numSamples}
+            {toScientific(numSamples)}
           </option>
         ))}
       </select>
     </div>
   );
 };
+
+const toScientific = (num: number) => {
+  return num.toExponential(1);
+}
 
 export default ComputeTimePage;

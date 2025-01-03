@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent } from "react";
 import Markdown from "../../Markdown/Markdown";
 import MarkdownWrapper from "../../Markdown/MarkdownWrapper";

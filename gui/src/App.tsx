@@ -2,13 +2,14 @@ import { useWindowDimensions } from "@fi-sci/misc";
 import "./App.css";
 
 import { FunctionComponent, useState } from "react";
-import ControlPanel from "./ControlPanel";
+import ControlPanel, { Page } from "./ControlPanel";
 import Splitter from "./components/Splitter";
 import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
 import OverviewPage from "./pages/OverviewPage/OverviewPage";
 import ComputeTimePage from "./pages/ComputeTimePage/ComputeTimePage";
 import TestPage from "./pages/TestPage/TestPage";
+import StoryPage from "./pages/StoryPage/StoryPage";
 
 function App() {
   const { width, height } = useWindowDimensions();
@@ -42,7 +43,7 @@ type MainWindowProps = {
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
   const initialControlPanelWidth = Math.min(250, width / 2);
-  const [page, setPage] = useState<"overview" | "wavelets" | "compression" | "compute_time" | "test">("overview");
+  const [page, setPage] = useState<Page>("overview");
   return (
     <Splitter
       width={width}
@@ -64,7 +65,7 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
 type MainWindow2Props = {
   width: number;
   height: number;
-  page: "overview" | "wavelets" | "compression" | "compute_time" | "test";
+  page: Page;
 };
 
 const MainWindow2: FunctionComponent<MainWindow2Props> = ({
@@ -107,6 +108,13 @@ const MainWindow2: FunctionComponent<MainWindow2Props> = ({
         height={height}
       />
     );
+  } else if (page === "story") {
+    return (
+      <StoryPage
+        width={width}
+        height={height}
+      />
+    )
   } else {
     return <div>Unknown page: {page}</div>;
   }

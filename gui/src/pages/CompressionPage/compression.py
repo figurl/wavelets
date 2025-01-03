@@ -26,14 +26,14 @@ def test_compression(*,
         raise ValueError(f'Unknown signal type: {signal_type}')
     if filt_lowcut is not None and filt_highcut is not None:
         original = bandpass_filter(
-            original - np.median(original),
+            original - np.median(original),  # subtracting the median avoids edge effects
             sampling_frequency=sampling_frequency,
             lowcut=filt_lowcut,
             highcut=filt_highcut,
         ).astype(np.int16)
     elif filt_lowcut is not None:
         original = highpass_filter(
-            original - np.median(original),
+            original - np.median(original),  # subtracting the median avoids edge effects
             sampling_frequency=sampling_frequency,
             lowcut=filt_lowcut,
         ).astype(np.int16)
@@ -44,13 +44,7 @@ def test_compression(*,
             highcut=filt_highcut,
         ).astype(np.int16)
     else:
-        if wavelet_name == "fourier":
-            # important to apply a slight highpass filter to remove DC offset
-            original = highpass_filter(
-                original - np.median(original),
-                sampling_frequency=sampling_frequency,
-                lowcut=10,
-            ).astype(np.int16)
+        pass
     original_size = original.nbytes
     if wavelet_name != 'fourier':
         coeffs = pywt.wavedec(original, wavelet_name, mode=wavelet_extension_mode)
@@ -60,6 +54,8 @@ def test_compression(*,
     else:
         raise ValueError(f'Unknown wavelet name: {wavelet_name}')
 
+    estimated_noise_level = estimate_noise_level(original, sampling_frequency=sampling_frequency)
+
     ret = []
     for nrmse in nrmses:
         quant_scale_factor = _monotonic_binary_search(
@@ -68,6 +64,7 @@ def test_compression(*,
                 coeffs=coeffs,
                 quant_scale_factor=x,
                 wavelet_name=wavelet_name,
+                estimated_noise_level=estimated_noise_level
             ),
             target_value=nrmse,
             max_iterations=100,
@@ -88,7 +85,7 @@ def test_compression(*,
         else:
             raise ValueError(f'Unknown lossless compression method: {lossless_compression_method}')
         compression_ratio = original_size / compressed_size
-        nrmse_actual = compute_nrmse(original, compressed)
+        nrmse_actual = compute_nrmse(original, compressed, estimated_noise_level)
 
         number_of_zeros = sum([np.sum(c == 0) for c in coeffs_quantized])
         frac_of_zeros = number_of_zeros / sum([c.size for c in coeffs_quantized])
@@ -141,6 +138,7 @@ def get_nrmse_for_quant_scale_factor(*,
     coeffs: list,
     quant_scale_factor: float,
     wavelet_name: str,
+    estimated_noise_level: float
 ):
     coeffs_quantized = [quantize(c / quant_scale_factor) for c in coeffs]
     if wavelet_name != 'fourier':
@@ -149,14 +147,14 @@ def get_nrmse_for_quant_scale_factor(*,
         compressed = np.fft.irfft(coeffs_quantized[0] + 1j * coeffs_quantized[1]) * quant_scale_factor
     else:
         raise ValueError(f'Unknown wavelet name: {wavelet_name}')
-    nrmse = compute_nrmse(original, compressed)
+    nrmse = compute_nrmse(original, compressed, estimated_noise_level)
     return nrmse
 
 
-def compute_nrmse(original: np.ndarray, compressed: np.ndarray) -> float:
+def compute_nrmse(original: np.ndarray, compressed: np.ndarray, estimated_noise_level: float) -> float:
     x = original.astype(float)
     y = compressed.astype(float)
-    return np.sqrt(np.mean((x - y) ** 2)) / np.sqrt(np.var(x))
+    return np.sqrt(np.mean((x - y) ** 2)) / estimated_noise_level
 
 
 def _monotonic_binary_search(
@@ -250,6 +248,11 @@ def zstandard_compress(data: bytes) -> bytes:
     cctx = zstd.ZstdCompressor(level=12)
     return cctx.compress(data)
 
+
+def estimate_noise_level(array: np.ndarray, *, sampling_frequency: float) -> float:
+    array_filtered = highpass_filter(array, sampling_frequency=sampling_frequency, lowcut=300)
+    MAD = float(np.median(np.abs(array_filtered - np.median(array_filtered))) / 0.6745)
+    return MAD
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

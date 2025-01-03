@@ -31,7 +31,7 @@ export const usePyodideResult = (code: string | null, o: {readCache?: boolean, w
       }
       setResult(undefined);
       const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(JSON.stringify({code, additionalFilesJson}))}`;
-      if (o.readCache) {
+      if (o.readCache ?? true) {
         const x = await getCachedValue(key);
         if (x) {
           setResult(x);
@@ -50,7 +50,7 @@ export const usePyodideResult = (code: string | null, o: {readCache?: boolean, w
         },
       }, additionalFilesJson ? JSON.parse(additionalFilesJson) : undefined);
       if (canceled) return;
-      if (o.writeCache) {
+      if (o.writeCache ?? true) {
         await setCachedValue(key, result);
       }
       if (canceled) return;

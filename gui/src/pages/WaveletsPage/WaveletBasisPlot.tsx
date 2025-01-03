@@ -26,21 +26,23 @@ basis_wavelets = get_basis_wavelets(
 `;
   const r = usePyodideResult(code);
   if (!r?.basis_wavelets) {
-    return <div>Loading...</div>;
+    return <div>Computing...</div>;
   }
   return (
     <div style={{ width: 400 }}>
-      <WaveletBasisPlotChild level={level} basisWavelets={r.basis_wavelets} />
+      <WaveletBasisPlotChild level={level} basisWavelets={r.basis_wavelets} waveletName={wavelet} />
     </div>
   );
 };
 
 type WaveletBasisPlotChildProps = {
+  waveletName: string;
   level: number;
   basisWavelets: number[][];
 };
 
 const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
+  waveletName,
   basisWavelets,
   level,
 }) => {
@@ -75,7 +77,7 @@ const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
     const layout = {
       width,
       height,
-      title: `Basis wavelets at level ${level}`,
+      title: `Basis ${waveletName} wavelets at level ${level}`,
       margin: {
         l: 60,
         r: 20,

@@ -12,9 +12,20 @@ type WaveletsPageProps = {
   height: number;
 };
 
-const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({ width, height }) => {
+const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({
+  width,
+  height,
+}) => {
   const divHandler = useMemo(() => {
-    return ({ className, props, children }: { className: string | undefined; props: any; children: any }) => {
+    return ({
+      className,
+      props,
+      children,
+    }: {
+      className: string | undefined;
+      props: any;
+      children: any;
+    }) => {
       if (className === "main") {
         return <WaveletsPageChild />;
       }
@@ -23,12 +34,10 @@ const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({ width, height }) =
   }, []);
   return (
     <MarkdownWrapper width={width} height={height}>
-      <Markdown source={wavelets_md}
-        divHandler={divHandler}
-      />
+      <Markdown source={wavelets_md} divHandler={divHandler} />
     </MarkdownWrapper>
   );
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type WaveletsPageChildProps = {
@@ -48,19 +57,30 @@ const WaveletsPageChild: FunctionComponent<WaveletsPageChildProps> = () => {
   return (
     <div>
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        <WaveletNameSelector waveletName={waveletName} setWaveletName={setWaveletName} />
+        <WaveletNameSelector
+          waveletName={waveletName}
+          setWaveletName={setWaveletName}
+        />
         &nbsp;&nbsp;
-        <NumSamplesSelector numSamples={numSamples} setNumSamples={setNumSamples} />
+        <NumSamplesSelector
+          numSamples={numSamples}
+          setNumSamples={setNumSamples}
+        />
       </div>
       <hr />
       {coeffSizes && levelChoices ? (
         <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {levelChoices.map((level: number) => (
-          <WaveletBasisPlot key={level} wavelet={waveletName} coeffSizes={coeffSizes} level={level} />
-        ))}
-      </div>
+          {levelChoices.map((level: number) => (
+            <WaveletBasisPlot
+              key={level}
+              wavelet={waveletName}
+              coeffSizes={coeffSizes}
+              level={level}
+            />
+          ))}
+        </div>
       ) : (
-        <div>Loading...</div>
+        <div>Computing...</div>
       )}
     </div>
   );
@@ -72,20 +92,29 @@ type WaveletNameSelectorProps = {
   includeFourier?: boolean;
 };
 
-const WaveletNameSelector: FunctionComponent<WaveletNameSelectorProps> = ({ waveletName, setWaveletName, includeFourier }) => {
+const WaveletNameSelector: FunctionComponent<WaveletNameSelectorProps> = ({
+  waveletName,
+  setWaveletName,
+  includeFourier,
+}) => {
   return (
     <div>
       <label>Wavelet:&nbsp;</label>
-      <select value={waveletName} onChange={(e) => setWaveletName(e.target.value as any)}>
-        {waveletNameChoices.filter(c => includeFourier || (c !== "fourier")).map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
+      <select
+        value={waveletName}
+        onChange={(e) => setWaveletName(e.target.value as any)}
+      >
+        {waveletNameChoices
+          .filter((c) => includeFourier || c !== "fourier")
+          .map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
       </select>
     </div>
   );
-}
+};
 
 const numSamplesChoices = [32, 64, 128, 256, 512, 1024];
 
@@ -94,11 +123,17 @@ type NumSamplesSelectorProps = {
   setNumSamples: (numSamples: number) => void;
 };
 
-const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({ numSamples, setNumSamples }) => {
+const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({
+  numSamples,
+  setNumSamples,
+}) => {
   return (
     <div>
       <label>Num samples:&nbsp;</label>
-      <select value={numSamples} onChange={(e) => setNumSamples(parseInt(e.target.value))}>
+      <select
+        value={numSamples}
+        onChange={(e) => setNumSamples(parseInt(e.target.value))}
+      >
         {numSamplesChoices.map((numSamples) => (
           <option key={numSamples} value={numSamples}>
             {numSamples}
@@ -107,6 +142,6 @@ const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({ numSam
       </select>
     </div>
   );
-}
+};
 
 export default WaveletsPage;
