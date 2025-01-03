@@ -1,7 +1,6 @@
 import { FunctionComponent, useState } from "react";
 
 export type Page =
-  | "overview"
   | "story"
   | "wavelets"
   | "compression"
@@ -237,7 +236,6 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {[
-          { id: "overview", label: "Overview" },
           { id: "story", label: "Story" },
           { id: "wavelets", label: "Wavelets" },
           { id: "compression", label: "Compression" },

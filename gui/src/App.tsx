@@ -6,7 +6,6 @@ import ControlPanel, { Page } from "./ControlPanel";
 import Splitter from "./components/Splitter";
 import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
-import OverviewPage from "./pages/OverviewPage/OverviewPage";
 import ComputeTimePage from "./pages/ComputeTimePage/ComputeTimePage";
 import TestPage from "./pages/TestPage/TestPage";
 import StoryPage from "./pages/StoryPage/StoryPage";
@@ -43,7 +42,7 @@ type MainWindowProps = {
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
   const initialControlPanelWidth = Math.min(250, width / 2);
-  const [page, setPage] = useState<Page>("overview");
+  const [page, setPage] = useState<Page>("story");
   return (
     <Splitter
       width={width}
@@ -68,9 +67,7 @@ const MainWindow2: FunctionComponent<MainWindow2Props> = ({
   height,
   page,
 }) => {
-  if (page === "overview") {
-    return <OverviewPage width={width} height={height} />;
-  } else if (page === "wavelets") {
+  if (page === "wavelets") {
     return <WaveletsPage width={width} height={height} />;
   } else if (page === "compression") {
     return <CompressionPage width={width} height={height} />;

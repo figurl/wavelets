@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent, useMemo } from "react";
+import { FunctionComponent, useMemo, useState } from "react";
 import Markdown from "../../Markdown/Markdown";
 import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
 import { WaveletBasisPlot } from "../WaveletsPage/WaveletBasisPlot";
 import { useCoeffSizes } from "../WaveletsPage/useCoeffSizes";
-import storyMd from "./story.md?raw";
+import waveletsStoryMd from "./story_wavelets.md?raw";
+import compressionStoryMd from "./story_compression.md?raw";
+import computeTimeStoryMd from "./story_compute_time.md?raw";
+import overviewStoryMd from "./story_overview.md?raw";
 import {
   CompressionPlot,
   useCompressionResult,
@@ -18,7 +21,24 @@ type Props = {
   height: number;
 };
 
+type Story = "overview" | "wavelets" | "compression" | "compute_time";
+
 const StoryPage: FunctionComponent<Props> = ({ width, height }) => {
+  const [selectedStory, setSelectedStory] = useState<Story>("overview");
+
+  const storyContent = useMemo(() => {
+    switch (selectedStory) {
+      case "overview":
+        return overviewStoryMd;
+      case "wavelets":
+        return waveletsStoryMd;
+      case "compression":
+        return compressionStoryMd;
+      case "compute_time":
+        return computeTimeStoryMd;
+    }
+  }, [selectedStory]);
+
   const divHandler = useMemo(() => {
     return ({
       className,
@@ -69,7 +89,30 @@ const StoryPage: FunctionComponent<Props> = ({ width, height }) => {
   }, []);
   return (
     <MarkdownWrapper width={width} height={height}>
-      <Markdown source={storyMd} divHandler={divHandler} />
+      <div style={{ marginBottom: 20, display: "flex", gap: "10px" }}>
+        {[
+          { value: "overview", label: "Overview" },
+          { value: "wavelets", label: "Wavelets" },
+          { value: "compression", label: "Compression" },
+          { value: "compute_time", label: "Compute Time" },
+        ].map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setSelectedStory(value as Story)}
+            style={{
+              padding: "8px 16px",
+              fontSize: "16px",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              background: selectedStory === value ? "#e0e0e0" : "white",
+              cursor: "pointer",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <Markdown source={storyContent} divHandler={divHandler} />
     </MarkdownWrapper>
   );
 };

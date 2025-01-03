@@ -1,12 +1,11 @@
-## Story (WIP)
+# Signal Compression
 
-Here are three levels of db4 wavelet basis vectors.
+Wavelet compression allows efficient representation of signals by removing less significant wavelet coefficients. The compression quality is measured by:
 
-<div class="wavelet-basis-plot" wavelet_name="db4" levels="0,1,3" num_samples="1024"></div>
+- **NRMSE (Normalized Root Mean Square Error)**: Measures the difference between original and compressed signals
+- **Compression Ratio**: The ratio of original to compressed data size
 
-To see more examples and to control the wavelet parameters, open the "Wavelets" menu.
-
-Wavelets can be used for lossy compression of timeseries data. Here's an example of a Gaussian signal that has been compressed and reconstructed using the db4 wavelet at three different error levels.
+Here's an example of a Gaussian signal that has been compressed and reconstructed using the db4 wavelet at three different error levels.
 
 <div class="compression-plot" wavelet_name="db4" num_samples="1024" signal_type="gaussian_noise" nrmses="0.1,0.3,0.6"></div>
 
