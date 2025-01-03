@@ -114,19 +114,14 @@ plt.show()
         />
         <div>
           <label>Wavelets:&nbsp;</label>
-          <select
+            <select
             value={selectedWavelets}
             onChange={(e) => setSelectedWavelets(e.target.value as keyof typeof waveletOptions)}
-          >
-            <option value="option0">{`${waveletOptions.option0.join(", ")}`}</option>
-            <option value="option1">{`${waveletOptions.option1.join(", ")}`}</option>
-            <option value="option2">{`${waveletOptions.option2.join(", ")}`}</option>
-            <option value="option3">{`${waveletOptions.option3.join(", ")}`}</option>
-            <option value="option4">{`${waveletOptions.option4.join(", ")}`}</option>
-            <option value="option5">{`${waveletOptions.option5.join(", ")}`}</option>
-            <option value="option6">{`${waveletOptions.option6.join(", ")}`}</option>
-            <option value="option7">{`${waveletOptions.option7.join(", ")}`}</option>
-          </select>
+            >
+            {Object.entries(waveletOptions).map(([key, value]) => (
+              <option key={key} value={key}>{value.join(", ")}</option>
+            ))}
+            </select>
         </div>
         <button
           onClick={toggleCache}

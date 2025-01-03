@@ -5,27 +5,35 @@ import pywt
 
 wavelet_extension_mode = 'symmetric'
 
-def code1(*,
+def test_compression(*,
     wavelet_name: str,
-    num_samples: int,
+    num_samples: int,  # only applies to synthetic data
     nrmses: List[float],
-    sampling_frequency: int = 30000,
     filt_lowcut: Union[float, None] = None,
     filt_highcut: Union[float, None] = None,
     lossless_compression_method: str = 'zstd',
+    signal_type: str = 'gaussian_noise'
 ):
-    timestamps = np.arange(num_samples) / sampling_frequency
-    original = (np.random.randn(num_samples) * 100).astype(np.int16)
+    if signal_type == 'gaussian_noise':
+        sampling_frequency = 30000
+        original = (np.random.randn(num_samples) * 100).astype(np.int16)
+    elif signal_type == 'real_ephys_1':
+        sampling_frequency = 30000
+        fname = 'traces.dat'
+        with open(fname, 'rb') as f:
+            original = np.frombuffer(f.read(), dtype=np.int16)
+    else:
+        raise ValueError(f'Unknown signal type: {signal_type}')
     if filt_lowcut is not None and filt_highcut is not None:
         original = bandpass_filter(
-            original,
+            original - np.median(original),
             sampling_frequency=sampling_frequency,
             lowcut=filt_lowcut,
             highcut=filt_highcut,
         ).astype(np.int16)
     elif filt_lowcut is not None:
         original = highpass_filter(
-            original,
+            original - np.median(original),
             sampling_frequency=sampling_frequency,
             lowcut=filt_lowcut,
         ).astype(np.int16)
@@ -36,12 +44,18 @@ def code1(*,
             highcut=filt_highcut,
         ).astype(np.int16)
     else:
-        pass
+        if wavelet_name == "fourier":
+            # important to apply a slight highpass filter to remove DC offset
+            original = highpass_filter(
+                original - np.median(original),
+                sampling_frequency=sampling_frequency,
+                lowcut=10,
+            ).astype(np.int16)
     original_size = original.nbytes
     if wavelet_name != 'fourier':
         coeffs = pywt.wavedec(original, wavelet_name, mode=wavelet_extension_mode)
     elif wavelet_name == 'fourier':
-        original_fft = np.fft.rfft(original)
+        original_fft = np.fft.rfft(original.astype(float))
         coeffs = [np.real(original_fft), np.imag(original_fft)]
     else:
         raise ValueError(f'Unknown wavelet name: {wavelet_name}')
@@ -88,7 +102,7 @@ def code1(*,
             'compression_ratio': compression_ratio
         })
     return {
-        'timestamps': timestamps.tolist(),
+        'sampling_frequency': sampling_frequency,
         'original': original.tolist(),
         'compressed': ret,
     }
@@ -140,7 +154,9 @@ def get_nrmse_for_quant_scale_factor(*,
 
 
 def compute_nrmse(original: np.ndarray, compressed: np.ndarray) -> float:
-    return float(np.sqrt(np.mean((original - compressed) ** 2)) / np.sqrt(np.mean(original ** 2)))
+    x = original.astype(float)
+    y = compressed.astype(float)
+    return np.sqrt(np.mean((x - y) ** 2)) / np.sqrt(np.var(x))
 
 
 def _monotonic_binary_search(
@@ -215,6 +231,12 @@ def _monotonic_binary_search(
 
 
 def quantize(data: np.ndarray) -> np.ndarray:
+    data_rounded = np.round(data)
+    # check that it is within the range of int16
+    if np.min(data_rounded) < np.iinfo(np.int16).min or np.max(data_rounded) > np.iinfo(np.int16).max:
+        # this happens for real data and Fourier method
+        print('Warning: data is out of range of int16. Using int32 instead.')
+        return np.round(data).astype(np.int32)
     return np.round(data).astype(np.int16)
 
 
@@ -231,17 +253,16 @@ def zstandard_compress(data: bytes) -> bytes:
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    x = code1(
+    x = test_compression(
         wavelet_name='db4',
         num_samples=5000,
         nrmses=[0.1, 0.2],
-        sampling_frequency=30000,
         filt_lowcut=300,
         filt_highcut=3000,
     )
-    timestamps = x['timestamps']
     original = x['original']
     num = len(x['compressed'])
+    timestamps = np.arange(len(original)) / x['sampling_frequency']
     # one subplot for each compression level
     fig, axs = plt.subplots(num, 1, figsize=(8, 3 * num))
     for i in range(num):

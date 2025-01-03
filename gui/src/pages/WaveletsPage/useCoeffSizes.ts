@@ -19,13 +19,18 @@ const codeHash = (code: string) => {
   return hash;
 }
 
-export const usePyodideResult = (code: string, o: {readCache: boolean, writeCache: boolean}={readCache: true, writeCache: true}) => {
+export const usePyodideResult = (code: string | null, o: {readCache?: boolean, writeCache?: boolean, additionalFiles?: {[key: string]: string | {base64: string}}}={readCache: undefined, writeCache: undefined, additionalFiles: undefined}) => {
   const [result, setResult] = useState<any>(undefined);
+  const additionalFilesJson = o.additionalFiles ? JSON.stringify(o.additionalFiles) : undefined;
   useEffect(() => {
     let canceled = false;
     const run = async () => {
+      if (code === null) {
+        setResult(null);
+        return;
+      }
       setResult(undefined);
-      const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(code)}`;
+      const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(JSON.stringify({code, additionalFilesJson}))}`;
       if (o.readCache) {
         const x = await getCachedValue(key);
         if (x) {
@@ -43,7 +48,7 @@ export const usePyodideResult = (code: string, o: {readCache: boolean, writeCach
         onStatus(status) {
           console.log("status", status);
         },
-      });
+      }, additionalFilesJson ? JSON.parse(additionalFilesJson) : undefined);
       if (canceled) return;
       if (o.writeCache) {
         await setCachedValue(key, result);
@@ -55,7 +60,7 @@ export const usePyodideResult = (code: string, o: {readCache: boolean, writeCach
     return () => {
       canceled = true;
     };
-  }, [code, o.readCache, o.writeCache]);
+  }, [code, o.readCache, o.writeCache, additionalFilesJson]);
   return result;
 };
 

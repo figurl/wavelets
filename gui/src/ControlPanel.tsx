@@ -206,7 +206,7 @@ export const waveletNameChoices = [
   "sym20",
 ];
 
-export type Filter = "none" | "300-6000 Hz" | "300- Hz";
+export type Filter = "none" | "bandpass 300-6000 Hz" | "highpass 300 Hz";
 
 const ControlPanel: FunctionComponent<ControlPanelProps> = ({
   width,

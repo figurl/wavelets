@@ -47,14 +47,14 @@ const loadPyodideInstance = async () => {
 
     try {
       pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full",
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.0/full",
         stdout: (x: string) => {
           sendStdout(x);
         },
         stderr: (x: string) => {
           sendStderr(x);
         },
-        packages: ["numpy", "micropip", "PyWavelets"],
+        packages: ["numpy", "requests", "h5py", "micropip", "PyWavelets"],
       });
     } finally {
       // Restore original fetch
@@ -103,12 +103,13 @@ self.onmessage = async (e) => {
   // }
   const message = e.data;
   if (message.code) {
-    await run(message.code);
+    await run(message.code, message.additionalFiles);
   }
 };
 
 const run = async (
   code: string,
+  additionalFiles?: {[filename: string]: string | {base64: string}}
 ) => {
   setStatus("loading");
   try {
@@ -125,7 +126,7 @@ const run = async (
     try {
       const packageFutures = [];
       // const micropip = pyodide.pyimport("micropip");
-
+      // packageFutures.push(micropip.install("pyodide-http"));
       // packageFutures.push(micropip.install("stanio"));
       packageFutures.push(pyodide.loadPackagesFromImports(script));
       for (const f of packageFutures) {
@@ -133,9 +134,27 @@ const run = async (
       }
 
       setStatus("running");
+      // Write any additional Python files to the filesystem
+      if (additionalFiles) {
+        for (const [filename, content] of Object.entries(additionalFiles)) {
+          if (typeof content === "string") {
+            pyodide.FS.writeFile(filename, content);
+          }
+          else {
+            const b64 = content.base64;
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+              bytes[i] = binary.charCodeAt(i);
+            }
+            pyodide.FS.writeFile(filename, bytes);
+          }
+        }
+      }
+
       const result = await pyodide.runPythonAsync(script, {
         globals: undefined,
-        filename: "test.py",
+        filename: "_script.py",
       });
       succeeded = true;
       sendResult(result.toJs());
@@ -143,11 +162,16 @@ const run = async (
       console.error(e);
       sendStderr(e.toString());
     } finally {
-      // if (files) {
-      //   for (const filename of Object.keys(files)) {
-      //     await pyodide.FS.unlink(filename);
-      //   }
-      // }
+      // Clean up any additional files
+      if (additionalFiles) {
+        for (const filename of Object.keys(additionalFiles)) {
+          try {
+            pyodide.FS.unlink(filename);
+          } catch (e) {
+            console.warn(`Failed to clean up file ${filename}:`, e);
+          }
+        }
+      }
     }
 
     setStatus(succeeded ? "completed" : "failed");
