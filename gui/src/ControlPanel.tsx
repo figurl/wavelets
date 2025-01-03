@@ -231,9 +231,15 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
         `}
       </style>
       <div
-        style={{ fontSize: "1.2em", fontWeight: "bold", marginBottom: "15px" }}
+        style={{
+          fontSize: "1em",
+          fontWeight: "bold",
+          marginBottom: "15px",
+          userSelect: "none",
+          color: "#666",
+        }}
       >
-        Contents
+        Wavelet Explorer
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {[
