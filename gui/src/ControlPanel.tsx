@@ -239,7 +239,7 @@ const ControlPanel: FunctionComponent<ControlPanelProps> = ({
           color: "#666",
         }}
       >
-        Wavelet Explorer
+        Lossy Time Series Compression
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {[

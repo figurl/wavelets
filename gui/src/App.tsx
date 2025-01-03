@@ -2,6 +2,7 @@ import { useWindowDimensions } from "@fi-sci/misc";
 import "./App.css";
 
 import { FunctionComponent, useState } from "react";
+import { PageProvider } from "./contexts/PageContext";
 import ControlPanel, { Page } from "./ControlPanel";
 import WaveletsPage from "./pages/WaveletsPage/WaveletsPage";
 import CompressionPage from "./pages/CompressionPage/CompressionPage";
@@ -43,34 +44,36 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ width, height }) => {
   const [page, setPage] = useState<Page>("story");
   const controlPanelWidth = 200;
   return (
-    <div
-      className="app-container"
-      style={{ width, height, overflow: "hidden" }}
-    >
+    <PageProvider value={{ page, setPage }}>
       <div
-        className="control-panel"
-        style={{
-          position: "absolute",
-          width: controlPanelWidth,
-          height,
-          backgroundColor: "#f0f4ff",
-        }}
+        className="app-container"
+        style={{ width, height, overflow: "hidden" }}
       >
-        <ControlPanel page={page} setPage={setPage} />
+        <div
+          className="control-panel"
+          style={{
+            position: "absolute",
+            width: controlPanelWidth,
+            height,
+            backgroundColor: "#f0f4ff",
+          }}
+        >
+          <ControlPanel page={page} setPage={setPage} />
+        </div>
+        <div
+          className="main-content"
+          style={{
+            position: "absolute",
+            left: controlPanelWidth,
+            width: width - controlPanelWidth,
+            height,
+            overflowY: "hidden",
+          }}
+        >
+          <MainWindow2 width={width - 250} height={height} page={page} />
+        </div>
       </div>
-      <div
-        className="main-content"
-        style={{
-          position: "absolute",
-          left: controlPanelWidth,
-          width: width - controlPanelWidth,
-          height,
-          overflowY: "hidden",
-        }}
-      >
-        <MainWindow2 width={width - 250} height={height} page={page} />
-      </div>
-    </div>
+    </PageProvider>
   );
 };
 

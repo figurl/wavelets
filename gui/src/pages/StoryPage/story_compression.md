@@ -1,19 +1,21 @@
 # Signal Compression
 
-Wavelet compression allows efficient representation of signals by removing less significant wavelet coefficients. The compression quality is measured by:
+Quantized Wavelet Compression (QWC) and Quantized Fourier Compression (QFC) compress time series data while preserving key features. Blue shows original signals, orange shows compressed versions. Quality metrics:
 
-- **NRMSE (Normalized Root Mean Square Error)**: Measures the difference between original and compressed signals
+- **NRMSE (Normalized Root Mean Square Error)**: Measures the difference between original and compressed signals, normalized by the estimated noise level
 - **Compression Ratio**: The ratio of original to compressed data size
 
-Here's an example of a Gaussian signal that has been compressed and reconstructed using the db4 wavelet at three different error levels.
+[custom compression exploration](?custom-compression-exploration)
+
+First, a Gaussian signal compressed with db4 wavelets at different error levels:
 
 <div class="compression-plot" wavelet_name="db4" num_samples="1024" signal_type="gaussian_noise" nrmses="0.1,0.3,0.6"></div>
 
-If we do quantized Fourier compression, we get a similar compression ratio.
+The same signal with Fourier compression:
 
 <div class="compression-plot" wavelet_name="fourier" num_samples="1024" signal_type="gaussian_noise" nrmses="0.6" transform="fourier"></div>
 
-Now let's apply this to some real electrophysiology data.
+Applied to real electrophysiology data:
 
 With quantized db4 wavelet compression:
 
@@ -23,10 +25,12 @@ And quantized Fourier compression:
 
 <div class="compression-plot" wavelet_name="fourier" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6" transform="fourier"></div>
 
-Now with a Bandpass filter for the db4 wavelet:
+With bandpass filtering (300-6000 Hz) to focus on relevant frequencies:
 
 <div class="compression-plot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6" filt_lowcut="300" filt_highcut="6000"></div>
 
-And for the Fourier transform:
+And with Fourier transform after filtering:
 
 <div class="compression-plot" wavelet_name="fourier" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6" transform="fourier" filt_lowcut="300" filt_highcut="6000"></div>
+
+Both methods achieve good compression, with wavelets typically handling sharp features better. Filtering can improve results by removing noise.

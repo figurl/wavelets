@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent, useMemo, useState } from "react";
+import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import { usePageContext } from "../../contexts/PageContext";
 import Markdown from "../../Markdown/Markdown";
 import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
 import { WaveletBasisPlot } from "../WaveletsPage/WaveletBasisPlot";
@@ -87,6 +88,18 @@ const StoryPage: FunctionComponent<Props> = ({ width, height }) => {
       return <div {...props}>{children}</div>;
     };
   }, []);
+  const { setPage } = usePageContext();
+  const handleSpecialLink = useCallback((link: string) => {
+    if (link === "?custom-wavelet-exploration") {
+      setPage("wavelets");
+    }
+    else if (link === "?custom-compression-exploration") {
+      setPage("compression");
+    }
+    else if (link === "custom-compute-time-exploration") {
+      setPage("compute_time");
+    }
+  }, [setPage]);
   return (
     <MarkdownWrapper width={width} height={height}>
       <div style={{ marginBottom: 20, display: "flex", gap: "10px" }}>
@@ -112,7 +125,7 @@ const StoryPage: FunctionComponent<Props> = ({ width, height }) => {
           </button>
         ))}
       </div>
-      <Markdown source={storyContent} divHandler={divHandler} />
+      <Markdown source={storyContent} divHandler={divHandler} onSpecialLinkClick={handleSpecialLink} />
     </MarkdownWrapper>
   );
 };
@@ -189,7 +202,7 @@ const CompressionPlotWrapper: FunctionComponent<
       {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
         <CompressionPlot
           key={i}
-          title={`NRMSE: ${
+          title={`Wavelet: ${waveletName}; NRMSE: ${
             Math.round(nrmse * 100) / 100
           }; Compression ratio: ${compression_ratio.toFixed(2)}`}
           samplingFrequency={result.sampling_frequency}

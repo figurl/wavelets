@@ -1,6 +1,8 @@
-This interactive tool helps you understand and experiment with discrete wavelets, especially in the context of compressing time series data, e.g., electrophysiology signals.
+## Lossy Time Series Compression for Electrophysiology
 
-It uses [PyWavelets](https://pywavelets.readthedocs.io/) running in your browser through [Pyodide](https://pyodide.org/), a Python runtime for the web.
+This interactive tool helps you understand and experiment with different methods of compressing time series data, especially electrophysiology signals.
+
+Everything is computed live in your browser using [Pyodide](https://pyodide.org/), a Python runtime for the web.
 
 Select one of the topics above to learn more, or one of the menu items on the left to for custom exploration.
 
