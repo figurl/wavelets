@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
-import { pyodideRun } from "../../pyodide/pyodideRun";
-import { getCachedValue, setCachedValue } from "../../utils/indexedDbCache";
-import wavelets_py from "./wavelets.py?raw";
-import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import { useEffect, useState } from "react";
+import { getCachedValue, setCachedValue } from "../utils/indexedDbCache";
+import { pyodideRun } from "./pyodideRun";
 
 const CACHE_VERSION = 1;
 const CACHE_KEY_PREFIX = "pyodideResult";
@@ -79,17 +77,4 @@ export const usePyodideResult = (
     };
   }, [code, o.readCache, o.writeCache, additionalFilesJson]);
   return result;
-};
-
-export const useCoeffSizes = (
-  wavelet: string,
-  n: number,
-): number[] | undefined => {
-  const code = `
-${removeMainSectionFromPy(wavelets_py)}
-coeff_sizes = get_coeff_sizes(n=${n}, wavelet='${wavelet}')
-{'coeff_sizes': coeff_sizes}
-`;
-  const r = usePyodideResult(code);
-  return r ? r.coeff_sizes : undefined;
 };

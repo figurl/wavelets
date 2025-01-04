@@ -1,60 +1,69 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { Filter, WaveletName } from "../../ControlPanel";
+import { WaveletName } from "../../common";
 import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
-import Markdown from "../../Markdown/Markdown";
-import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
 import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
+import { CompressionPlotMode, SignalType } from "./selectors";
 import { RemoteH5File } from "../../remote-h5-file";
 import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
-import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
-import compression_md from "./compression.md?raw";
 import compression_py from "./compression.py?raw";
-import {
-  CompressionPlotMode,
-  CompressionPlotModeSelector,
-  FilterSelector,
-  NumSamplesSelector,
-  SignalType,
-  SignalTypeSelector,
-  WaveletNameSelector,
-} from "./selectors";
+import { usePyodideResult } from "../../pyodide/usePyodideResult";
 
-type CompressionPageProps = {
-  width: number;
-  height: number;
+type DivCompressionPlotProps = {
+  waveletName: string;
+  numSamples: number;
+  filtLowcut?: number;
+  filtHighcut?: number;
+  signalType: string;
+  nrmses: number[];
 };
 
-const CompressionPage: FunctionComponent<CompressionPageProps> = ({
-  width,
-  height,
+export const DivCompressionPlot: FunctionComponent<DivCompressionPlotProps> = ({
+  waveletName,
+  numSamples,
+  filtLowcut,
+  filtHighcut,
+  signalType,
+  nrmses,
 }) => {
-  const divHandler = useMemo(() => {
-    return ({
-      className,
-      props,
-      children,
-    }: {
-      className: string | undefined;
-      props: any;
-      children: any;
-    }) => {
-      if (className === "main") {
-        return <CompressionPageChild />;
-      }
-      return <div {...props}>{children}</div>;
-    };
-  }, []);
-  return (
-    <MarkdownWrapper width={width} height={height}>
-      <Markdown source={compression_md} divHandler={divHandler} />
-    </MarkdownWrapper>
-  );
-};
+  const result = useCompressionResult({
+    waveletName: waveletName as WaveletName,
+    numSamples,
+    filtLowcut,
+    filtHighcut,
+    signalType: signalType as SignalType,
+    nrmses,
+  });
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-type CompressionPageChildProps = {
-  //
+  const width = useDocumentWidth();
+
+  if (result === null) {
+    return <div>Loading signal file...</div>;
+  }
+
+  if (!result) {
+    return <div>Computing...</div>;
+  }
+
+  const plotMode = "default";
+
+  return (
+    <>
+      {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
+        <CompressionPlot
+          key={i}
+          title={`Wavelet: ${waveletName}; NRMSE: ${
+            Math.round(nrmse * 100) / 100
+          }; Compression ratio: ${compression_ratio.toFixed(2)}`}
+          samplingFrequency={result.sampling_frequency}
+          original={result.original.slice(0, numSamples)}
+          compressed={compressed.slice(0, numSamples)}
+          width={width - 30} // leave room for scrollbar
+          height={400}
+          mode={plotMode}
+        />
+      ))}
+    </>
+  );
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -83,7 +92,7 @@ test_compression(
     filt_highcut=${filtHighcut ? filtHighcut : "None"},
     signal_type='${signalType}'
 )
-`;
+  `;
   const signalFile: ArrayBuffer | null | undefined = useSignalFile(
     signalType,
     numSamples,
@@ -118,84 +127,14 @@ test_compression(
   return result;
 };
 
-const nrmses = [0.1, 0.2, 0.4, 0.6, 0.8];
-
-const CompressionPageChild: FunctionComponent<
-  CompressionPageChildProps
-> = () => {
-  const [waveletName, setWaveletName] = useState<WaveletName>("db4");
-  const [numSamples, setNumSamples] = useState(1024);
-  const [filter, setFilter] = useState<Filter>("none");
-  const [signalType, setSignalType] = useState<SignalType>("gaussian_noise");
-  const [plotMode, setPlotMode] = useState<CompressionPlotMode>("default");
-  const { filtLowcut, filtHighcut } = parseFilter(filter);
-  const width = useDocumentWidth();
-
-  const result = useCompressionResult({
-    waveletName,
-    numSamples,
-    filtLowcut,
-    filtHighcut,
-    signalType,
-    nrmses,
-  });
-
-  if (result === null) {
-    return <div>Loading signal file...</div>;
+const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
   }
-
-  if (!result) {
-    return <div>Computing...</div>;
-  }
-
-  return (
-    <div>
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        <SignalTypeSelector
-          signalType={signalType}
-          setSignalType={setSignalType}
-        />
-        &nbsp;&nbsp;
-        <WaveletNameSelector
-          waveletName={waveletName}
-          setWaveletName={setWaveletName}
-          includeFourier={true}
-        />
-        &nbsp;&nbsp;
-        <NumSamplesSelector
-          numSamples={numSamples}
-          setNumSamples={setNumSamples}
-        />
-        &nbsp;&nbsp;
-        <FilterSelector filter={filter} setFilter={setFilter} />
-        &nbsp;&nbsp;
-        <CompressionPlotModeSelector mode={plotMode} setMode={setPlotMode} />
-      </div>
-      <hr />
-      <CompressionRatioVsNRMSEPlot
-        nrmses={result.compressed.map(({ nrmse }) => nrmse)}
-        compressionRatios={result.compressed.map(
-          ({ compression_ratio }) => compression_ratio,
-        )}
-        width={Math.min(width, 600)}
-        height={300}
-      />
-      {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
-        <CompressionPlot
-          key={i}
-          title={`NRMSE: ${
-            Math.round(nrmse * 100) / 100
-          }; Compression ratio: ${compression_ratio.toFixed(2)}`}
-          samplingFrequency={result.sampling_frequency}
-          original={result.original.slice(0, numSamples)}
-          compressed={compressed.slice(0, numSamples)}
-          width={width - 30} // leave room for scrollbar
-          height={400}
-          mode={plotMode}
-        />
-      ))}
-    </div>
-  );
+  return btoa(binary);
 };
 
 const useSignalFile = (
@@ -243,74 +182,6 @@ const useSignalFile = (
     };
   }, [signalType, numSamples]);
   return signalFile;
-};
-
-const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-};
-
-const parseFilter = (filter: Filter) => {
-  if (filter === "none") {
-    return { filtLowcut: undefined, filtHighcut: undefined };
-  } else if (filter === "bandpass 300-6000 Hz") {
-    return { filtLowcut: 300, filtHighcut: 6000 };
-  } else if (filter === "highpass 300 Hz") {
-    return { filtLowcut: 300, filtHighcut: undefined };
-  } else {
-    throw new Error(`Invalid filter: ${filter}`);
-  }
-};
-
-type CompressionRatioVsNRMSEPlotProps = {
-  nrmses: number[];
-  compressionRatios: number[];
-  width: number;
-  height: number;
-};
-
-const CompressionRatioVsNRMSEPlot: FunctionComponent<
-  CompressionRatioVsNRMSEPlotProps
-> = ({ nrmses, compressionRatios, width, height }) => {
-  const { data, layout } = useMemo(() => {
-    const data = [
-      {
-        x: nrmses,
-        y: compressionRatios,
-        type: "scatter",
-        mode: "markers+lines",
-      },
-    ];
-    const layout = {
-      width,
-      height,
-      title: ``,
-      margin: {
-        l: 60,
-        r: 20,
-        t: 70,
-        b: 60,
-        pad: 0,
-      },
-      xaxis: {
-        title: "NRMSE",
-        automargin: false,
-      },
-      yaxis: {
-        title: "Compression ratio",
-        automargin: false,
-        tickpadding: 5,
-        ticklen: 4,
-      },
-    };
-    return { data, layout };
-  }, [nrmses, compressionRatios, width, height]);
-  return <LazyPlotlyPlot data={data} layout={layout} />;
 };
 
 type CompressionPlotProps = {
@@ -397,5 +268,3 @@ export const CompressionPlot: FunctionComponent<CompressionPlotProps> = ({
 const timestampsForSignal = (numSamples: number, samplingFrequency: number) => {
   return Array.from({ length: numSamples }, (_, i) => i / samplingFrequency);
 };
-
-export default CompressionPage;

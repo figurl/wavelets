@@ -1,50 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useMemo, useState } from "react";
-import { WaveletName, waveletNameChoices } from "../../ControlPanel";
-import Markdown from "../../Markdown/Markdown";
-import wavelets_md from "./wavelets.md?raw";
 import { useCoeffSizes } from "./useCoeffSizes";
 import { WaveletBasisPlot } from "./WaveletBasisPlot";
-import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
-
-type WaveletsPageProps = {
-  width: number;
-  height: number;
-};
-
-const WaveletsPage: FunctionComponent<WaveletsPageProps> = ({
-  width,
-  height,
-}) => {
-  const divHandler = useMemo(() => {
-    return ({
-      className,
-      props,
-      children,
-    }: {
-      className: string | undefined;
-      props: any;
-      children: any;
-    }) => {
-      if (className === "main") {
-        return <WaveletsPageChild />;
-      }
-      return <div {...props}>{children}</div>;
-    };
-  }, []);
-  return (
-    <MarkdownWrapper width={width} height={height}>
-      <Markdown source={wavelets_md} divHandler={divHandler} />
-    </MarkdownWrapper>
-  );
-};
+import { WaveletName, waveletNameChoices } from "../../common";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-type WaveletsPageChildProps = {
+type DivExploreWaveletsProps = {
   //
 };
 
-const WaveletsPageChild: FunctionComponent<WaveletsPageChildProps> = () => {
+const DivExploreWavelets: FunctionComponent<DivExploreWaveletsProps> = () => {
   const [waveletName, setWaveletName] = useState<WaveletName>("db4");
   const [numSamples, setNumSamples] = useState(512);
   const coeffSizes = useCoeffSizes(waveletName, numSamples);
@@ -144,4 +109,4 @@ const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({
   );
 };
 
-export default WaveletsPage;
+export default DivExploreWavelets;

@@ -19,6 +19,7 @@ import remarkMathPlugin from "remark-math";
 type Props = {
   source: string;
   onSpecialLinkClick?: (link: string) => void;
+  onRelativeLinkClick?: (link: string) => void;
   onRunCode?: (code: string) => void;
   runCodeReady?: boolean;
   files?: { [name: string]: string };
@@ -33,6 +34,7 @@ type Props = {
 const Markdown: FunctionComponent<Props> = ({
   source,
   onSpecialLinkClick,
+  onRelativeLinkClick,
   onRunCode,
   runCodeReady,
   files,
@@ -101,6 +103,20 @@ const Markdown: FunctionComponent<Props> = ({
             <Hyperlink
               onClick={() => {
                 onSpecialLinkClick(href);
+              }}
+            >
+              {children}
+            </Hyperlink>
+          );
+        } else if (
+          href &&
+          (href.startsWith("./") || href.startsWith("../")) &&
+          onRelativeLinkClick
+        ) {
+          return (
+            <Hyperlink
+              onClick={() => {
+                onRelativeLinkClick(href);
               }}
             >
               {children}

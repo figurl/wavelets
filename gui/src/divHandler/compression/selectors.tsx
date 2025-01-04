@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent } from "react";
-import { Filter, WaveletName, waveletNameChoices } from "../../ControlPanel";
+import { Filter, WaveletName, waveletNameChoices } from "../../common";
 
 const numSamplesChoices = [32, 64, 128, 256, 512, 1024, 2048];
 

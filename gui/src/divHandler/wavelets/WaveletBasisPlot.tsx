@@ -1,8 +1,8 @@
 import { FunctionComponent, useMemo } from "react";
 import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
-import { usePyodideResult } from "./useCoeffSizes";
 import wavelets_py from "./wavelets.py?raw";
 import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import { usePyodideResult } from "../../pyodide/usePyodideResult";
 
 type WaveletBasisPlotProps = {
   wavelet: string;
@@ -101,6 +101,6 @@ const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
       showlegend: false,
     };
     return { data, layout };
-  }, [basisWavelets, level]);
+  }, [basisWavelets, level, waveletName]);
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };

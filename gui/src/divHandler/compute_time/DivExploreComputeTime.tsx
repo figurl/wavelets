@@ -1,48 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
-import code1 from "./compute_time.py?raw";
-import { usePyodideResult } from "../WaveletsPage/useCoeffSizes";
-import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
-import Markdown from "../../Markdown/Markdown";
-import compute_time_md from "./compute_time.md?raw";
-import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
-import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
 import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
-
-type ComputeTimePageProps = {
-  width: number;
-  height: number;
-};
-
-const ComputeTimePage: FunctionComponent<ComputeTimePageProps> = ({
-  width,
-  height,
-}) => {
-  const divHandler = useMemo(() => {
-    return ({
-      className,
-      props,
-      children,
-    }: {
-      className: string | undefined;
-      props: any;
-      children: any;
-    }) => {
-      if (className === "main") {
-        return <ComputeTimePageChild />;
-      }
-      return <div {...props}>{children}</div>;
-    };
-  }, []);
-  return (
-    <MarkdownWrapper width={width} height={height}>
-      <Markdown source={compute_time_md} divHandler={divHandler} />
-    </MarkdownWrapper>
-  );
-};
+import Markdown from "../../Markdown/Markdown";
+import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
+import { usePyodideResult } from "../../pyodide/usePyodideResult";
+import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import code1 from "./compute_time.py?raw";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-type ComputeTimePageChildProps = {
+type DivExploreComputeTimeProps = {
   //
 };
 
@@ -57,8 +22,8 @@ const waveletOptions = {
   option7: ["sym4", "sym8", "sym12", "sym16"],
 };
 
-const ComputeTimePageChild: FunctionComponent<
-  ComputeTimePageChildProps
+export const DivExploreComputeTime: FunctionComponent<
+  DivExploreComputeTimeProps
 > = () => {
   const [numSamples, setNumSamples] = useState(1e6);
   const [selectedWavelets, setSelectedWavelets] =
@@ -268,4 +233,4 @@ const toScientific = (num: number) => {
   return num.toExponential(1);
 };
 
-export default ComputeTimePage;
+export default DivExploreComputeTime;

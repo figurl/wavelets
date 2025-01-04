@@ -5,7 +5,7 @@ Quantized Wavelet Compression (QWC) and Quantized Fourier Compression (QFC) comp
 - **NRMSE (Normalized Root Mean Square Error)**: Measures the difference between original and compressed signals, normalized by the estimated noise level
 - **Compression Ratio**: The ratio of original to compressed data size
 
-[custom compression exploration](?custom-compression-exploration)
+[Explore compression](./explore/compression.md)
 
 First, a Gaussian signal compressed with db4 wavelets at different error levels:
 
