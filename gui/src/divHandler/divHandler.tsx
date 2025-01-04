@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DivCompressionPlot } from "./compression/DivCompressionPlot";
-import DivExploreCompression from "./compression/DivExploreCompression";
-import DivExploreComputeTime from "./compute_time/DivExploreComputeTime";
-import DivExploreWavelets from "./wavelets/DivExploreWavelets";
-import DivWaveletBasisPlot from "./wavelets/DivWaveletBasisPlot";
+import { DivCompressionPlot } from "../views/compression/DivCompressionPlot";
+import DivExploreCompression from "../views/compression/DivExploreCompression";
+import DivExploreComputeTime from "../views/compute_time/DivExploreComputeTime";
+import DivExploreWavelets from "../views/wavelets/DivExploreWavelets";
+import DivWaveletBasisPlot from "../views/wavelets/DivWaveletBasisPlot";
 
 const divHandler = ({
   className,
