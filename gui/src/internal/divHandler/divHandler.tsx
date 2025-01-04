@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Import all Div*.tsx components from views directory
 const componentModules = import.meta.glob<{ default: any }>(
-  "../views/**/*.tsx",
+  "../../views/**/*.tsx",
   {
     eager: true,
   },
@@ -30,6 +30,7 @@ const divHandler = ({
   props: any;
   children: any;
 }) => {
+  console.log("--- className:", className, divComponents);
   // Use className directly as the component name
   if (className && divComponents[className]) {
     const Component = divComponents[className];
