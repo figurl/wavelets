@@ -1,7 +1,7 @@
 import { useWindowDimensions } from "@fi-sci/misc";
 import "./App.css";
 
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { useRoute } from "./Route";
 import RouteProvider from "./RouteProvider";
@@ -10,10 +10,6 @@ import TestPage from "./pages/TestPage/TestPage";
 
 function App() {
   const { width, height } = useWindowDimensions();
-  const [okayToViewSmallScreen, setOkayToViewSmallScreen] = useState(false);
-  if (width < 800 && !okayToViewSmallScreen) {
-    return <SmallScreenMessage onOkay={() => setOkayToViewSmallScreen(true)} />;
-  }
   return (
     <BrowserRouter>
       <RouteProvider>
@@ -38,22 +34,6 @@ const Main: FunctionComponent<MainProps> = ({ width, height }) => {
   } else {
     return <div>Unknown route type: {route["type"]}</div>;
   }
-};
-
-const SmallScreenMessage: FunctionComponent<{ onOkay: () => void }> = ({
-  onOkay,
-}) => {
-  return (
-    <div style={{ padding: 20 }}>
-      <p>
-        This page is not optimized for small screens or mobile devices. Please
-        use a larger screen or expand your browser window width.
-      </p>
-      <p>
-        <button onClick={onOkay}>Continue anyway</button>
-      </p>
-    </div>
-  );
 };
 
 export default App;

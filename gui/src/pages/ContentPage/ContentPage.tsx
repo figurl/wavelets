@@ -84,6 +84,7 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
           height={height - 40}
           initialPosition={300}
           adjustable={true}
+          hideFirstChild={width < 900}
         >
           <FileTree
             width={0}
