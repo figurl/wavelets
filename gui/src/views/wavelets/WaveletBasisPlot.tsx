@@ -1,8 +1,8 @@
 import { FunctionComponent, useMemo } from "react";
-import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
+import LazyPlotlyPlot from "../../internal/Plotly/LazyPlotlyPlot";
 import wavelets_py from "./wavelets.py?raw";
-import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
-import { usePyodideResult } from "../../pyodide/usePyodideResult";
+import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
+import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 
 type WaveletBasisPlotProps = {
   wavelet: string;

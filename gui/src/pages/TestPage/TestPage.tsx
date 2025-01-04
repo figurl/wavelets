@@ -1,8 +1,8 @@
 import { FunctionComponent, useCallback } from "react";
-import Markdown from "../../Markdown/Markdown";
-import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
+import Markdown from "../../internal/Markdown/Markdown";
+import MarkdownWrapper from "../../internal/Markdown/MarkdownWrapper";
 import testMd from "./test.md?raw";
-import { pyodideRun } from "../../pyodide/pyodideRun";
+import { pyodideRun } from "../../internal/pyodide/pyodideRun";
 import test_py from "./test.py?raw";
 import RemoteFile_py from "./RemoteFile.py?raw";
 

@@ -1,12 +1,12 @@
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { WaveletName } from "../../common";
-import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
-import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
+import { useDocumentWidth } from "../../internal/Markdown/DocumentWidthContext";
+import LazyPlotlyPlot from "../../internal/Plotly/LazyPlotlyPlot";
 import { CompressionPlotMode, SignalType } from "./selectors";
-import { RemoteH5File } from "../../remote-h5-file";
-import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import { RemoteH5File } from "../../internal/remote-h5-file";
+import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
 import compression_py from "./compression.py?raw";
-import { usePyodideResult } from "../../pyodide/usePyodideResult";
+import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 
 type DivCompressionPlotProps = {
   wavelet_name: string; // raw prop name from markdown

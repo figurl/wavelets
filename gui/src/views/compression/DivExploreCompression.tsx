@@ -1,8 +1,8 @@
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
-import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
-import { RemoteH5File } from "../../remote-h5-file";
-import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import { useDocumentWidth } from "../../internal/Markdown/DocumentWidthContext";
+import LazyPlotlyPlot from "../../internal/Plotly/LazyPlotlyPlot";
+import { RemoteH5File } from "../../internal/remote-h5-file";
+import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
 import compression_py from "./compression.py?raw";
 import {
   CompressionPlotMode,
@@ -14,7 +14,7 @@ import {
   WaveletNameSelector,
 } from "./selectors";
 import { Filter, WaveletName } from "../../common";
-import { usePyodideResult } from "../../pyodide/usePyodideResult";
+import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type DivExploreCompressionProps = {

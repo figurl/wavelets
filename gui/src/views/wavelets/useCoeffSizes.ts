@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { usePyodideResult } from "../../pyodide/usePyodideResult";
-import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
+import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
 import wavelets_py from "./wavelets.py?raw";
 
 export const useCoeffSizes = (

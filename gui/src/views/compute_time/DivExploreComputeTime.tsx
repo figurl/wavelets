@@ -1,9 +1,9 @@
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
-import { useDocumentWidth } from "../../Markdown/DocumentWidthContext";
-import Markdown from "../../Markdown/Markdown";
-import LazyPlotlyPlot from "../../Plotly/LazyPlotlyPlot";
-import { usePyodideResult } from "../../pyodide/usePyodideResult";
-import { removeMainSectionFromPy } from "../../utils/removeMainSectionFromPy";
+import { useDocumentWidth } from "../../internal/Markdown/DocumentWidthContext";
+import Markdown from "../../internal/Markdown/Markdown";
+import LazyPlotlyPlot from "../../internal/Plotly/LazyPlotlyPlot";
+import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
+import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
 import code1 from "./compute_time.py?raw";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

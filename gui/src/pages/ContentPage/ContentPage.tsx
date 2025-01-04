@@ -1,8 +1,8 @@
 import { FunctionComponent, useCallback, FC, useState } from "react";
 import { useRoute, Route } from "../../Route";
-import Markdown from "../../Markdown/Markdown";
-import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
-import divHandler from "../../divHandler/divHandler";
+import Markdown from "../../internal/Markdown/Markdown";
+import MarkdownWrapper from "../../internal/Markdown/MarkdownWrapper";
+import divHandler from "../../internal/divHandler/divHandler";
 
 // Import all markdown files from content directory
 const mdModules = import.meta.glob<{ default: string }>(
