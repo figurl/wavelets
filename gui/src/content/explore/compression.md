@@ -5,4 +5,4 @@ The plots below demonstrate signal compression at different NRMSE targets. You c
 - **NRMSE (Normalized Root Mean Square Error)**: Measures the difference between original and compressed signals
 - **Compression Ratio**: The ratio of original to compressed data size
 
-<div class="explore-compression"></div>
+<div class="DivExploreCompression"></div>

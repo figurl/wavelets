@@ -7,16 +7,16 @@ The below graphs show wavelets at different scales and positions.
 [Explore wavelets](./explore/wavelets.md)
 
 <!-- haar -->
-<div class="wavelet-basis-plot" wavelet_name="haar" levels="0,1,2,3" num_samples="1024"></div>
+<div class="DivWaveletBasisPlot" wavelet_name="haar" levels="0,1,2,3" num_samples="1024"></div>
 
 <!-- db4 -->
-<div class="wavelet-basis-plot" wavelet_name="db4" levels="0,1,2,3" num_samples="1024"></div>
+<div class="DivWaveletBasisPlot" wavelet_name="db4" levels="0,1,2,3" num_samples="1024"></div>
 
 <!-- coif4 -->
-<div class="wavelet-basis-plot" wavelet_name="coif4" levels="0,1,2,3" num_samples="1024"></div>
+<div class="DivWaveletBasisPlot" wavelet_name="coif4" levels="0,1,2,3" num_samples="1024"></div>
 
 <!-- sym4 -->
-<div class="wavelet-basis-plot" wavelet_name="sym4" levels="0,1,2,3" num_samples="1024"></div>
+<div class="DivWaveletBasisPlot" wavelet_name="sym4" levels="0,1,2,3" num_samples="1024"></div>
 
 <!-- bior2.4 -->
-<div class="wavelet-basis-plot" wavelet_name="bior2.4" levels="0,1,2,3" num_samples="1024"></div>
+<div class="DivWaveletBasisPlot" wavelet_name="bior2.4" levels="0,1,2,3" num_samples="1024"></div>

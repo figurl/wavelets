@@ -9,22 +9,29 @@ import compression_py from "./compression.py?raw";
 import { usePyodideResult } from "../../pyodide/usePyodideResult";
 
 type DivCompressionPlotProps = {
-  waveletName: string;
-  numSamples: number;
-  filtLowcut?: number;
-  filtHighcut?: number;
-  signalType: string;
-  nrmses: number[];
+  wavelet_name: string; // raw prop name from markdown
+  num_samples: string; // comes as string from markdown
+  filt_lowcut?: string;
+  filt_highcut?: string;
+  signal_type: string;
+  nrmses: string; // comes as comma-separated string from markdown
 };
 
-export const DivCompressionPlot: FunctionComponent<DivCompressionPlotProps> = ({
-  waveletName,
-  numSamples,
-  filtLowcut,
-  filtHighcut,
-  signalType,
-  nrmses,
-}) => {
+const DivCompressionPlot: FunctionComponent<DivCompressionPlotProps> = (
+  props,
+) => {
+  // Parse raw props
+  const waveletName = props.wavelet_name;
+  const numSamples = parseInt(props.num_samples);
+  const filtLowcut = props.filt_lowcut
+    ? parseFloat(props.filt_lowcut)
+    : undefined;
+  const filtHighcut = props.filt_highcut
+    ? parseFloat(props.filt_highcut)
+    : undefined;
+  const signalType = props.signal_type;
+  const nrmses = props.nrmses.split(",").map((s) => parseFloat(s));
+
   const result = useCompressionResult({
     waveletName: waveletName as WaveletName,
     numSamples,
@@ -268,3 +275,5 @@ export const CompressionPlot: FunctionComponent<CompressionPlotProps> = ({
 const timestampsForSignal = (numSamples: number, samplingFrequency: number) => {
   return Array.from({ length: numSamples }, (_, i) => i / samplingFrequency);
 };
+
+export default DivCompressionPlot;
