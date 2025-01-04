@@ -1,5 +1,5 @@
-import { FunctionComponent, useCallback } from "react";
-import { useRoute } from "../../Route";
+import { FunctionComponent, useCallback, FC } from "react";
+import { useRoute, Route } from "../../Route";
 import Markdown from "../../Markdown/Markdown";
 import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
 import divHandler from "../../divHandler/divHandler";
@@ -44,6 +44,60 @@ type ContentPageProps = {
   height: number;
 };
 
+type TopBarProps = {
+  setRoute: (route: Route) => void;
+  currentPath: string;
+};
+
+const TopBar: FC<TopBarProps> = ({ setRoute, currentPath }) => {
+  const isHome = currentPath === "index.md";
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '40px',
+      backgroundColor: '#f5f5f5',
+      borderBottom: '1px solid #ddd',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '0 20px',
+      zIndex: 1000
+    }}>
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          if (!isHome) {
+            setRoute({ type: "content", d: "index.md" });
+          }
+        }}
+        style={{
+          ...(!isHome ? {
+            cursor: 'pointer',
+          } : {
+            cursor: 'default',
+            opacity: 0.5,
+            pointerEvents: isHome ? 'none' : 'auto',
+          }),
+          color: '#333',
+          textDecoration: 'none',
+          fontSize: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginTop: '1px' }}>
+          <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span>Home</span>
+      </a>
+    </div>
+  );
+};
+
 const ContentPage: FunctionComponent<ContentPageProps> = ({
   width,
   height,
@@ -63,13 +117,18 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
     return <div>Content not found: {d}</div>;
   }
   return (
-    <MarkdownWrapper width={width} height={height}>
-      <Markdown
-        source={source}
-        onRelativeLinkClick={handleRelativeLinkClick}
-        divHandler={divHandler}
-      />
-    </MarkdownWrapper>
+    <div style={{ position: 'relative', height }}>
+      <TopBar setRoute={setRoute} currentPath={d} />
+      <div style={{ paddingTop: '40px', height: '100%' }}>
+        <MarkdownWrapper width={width} height={height - 40}>
+          <Markdown
+            source={source}
+            onRelativeLinkClick={handleRelativeLinkClick}
+            divHandler={divHandler}
+          />
+        </MarkdownWrapper>
+      </div>
+    </div>
   );
 };
 
