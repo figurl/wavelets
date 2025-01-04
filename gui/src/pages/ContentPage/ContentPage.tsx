@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, FC, useState } from "react";
+import { FunctionComponent, useCallback, FC, useState, useMemo } from "react";
 import { useRoute, Route } from "../../Route";
 import Markdown from "../../internal/Markdown/Markdown";
 import MarkdownWrapper from "../../internal/Markdown/MarkdownWrapper";
@@ -48,9 +48,19 @@ type TopBarProps = {
   setRoute: (route: Route) => void;
 };
 
-const TopBar: FC<TopBarProps> = ({ setRoute }) => {
+const parseMarkdownTitle = (markdown: string): string => {
+  const lines = markdown.split('\n');
+  if (lines.length > 0) {
+    const firstLine = lines[0].trim();
+    if (firstLine.startsWith('#')) {
+      return firstLine.replace(/^#+\s*/, '').trim();
+    }
+  }
+  return 'Lossy Time Series Compression for Electrophysiology';
+};
+
+const TopBar: FC<TopBarProps & { currentMarkdown: string }> = ({ setRoute, currentMarkdown }) => {
   const [isLogoHovered, setIsLogoHovered] = useState(false);
-  const [isTitleHovered, setIsTitleHovered] = useState(false);
   return (
     <div
       style={{
@@ -93,26 +103,15 @@ const TopBar: FC<TopBarProps> = ({ setRoute }) => {
           }}
         />
       </a>
-      <a
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          setRoute({ type: "content", d: "index.md" });
-        }}
-        onMouseEnter={() => setIsTitleHovered(true)}
-        onMouseLeave={() => setIsTitleHovered(false)}
+      <span
         style={{
           fontSize: "18px",
           fontWeight: 500,
-          color: isTitleHovered ? "#007bff" : "#333",
-          textDecoration: "none",
-          cursor: "pointer",
-          transition: "color 0.2s ease-in-out",
+          color: "#333",
         }}
-        title="Go to home"
       >
-        Lossy Time Series Compression for Electrophysiology
-      </a>
+        {parseMarkdownTitle(currentMarkdown)}
+      </span>
     </div>
   );
 };
@@ -125,6 +124,16 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
   if (route.type !== "content") throw new Error("Invalid route type");
   const { d } = route;
   const source = contents[d];
+
+  // Get content without the title line for rendering
+  const contentWithoutTitle = useMemo(() => {
+    const lines = source?.split('\n') || [];
+    if (lines.length > 0 && lines[0].trim().startsWith('#')) {
+      return lines.slice(1).join('\n').trim();
+    }
+    return source || '';
+  }, [source]);
+
   const handleRelativeLinkClick = useCallback(
     (link: string) => {
       setRoute({ type: "content", d: resolvePath(d || "index.md", link) });
@@ -137,11 +146,11 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
   }
   return (
     <div style={{ position: "relative", height }}>
-      <TopBar setRoute={setRoute} />
+      <TopBar setRoute={setRoute} currentMarkdown={source} />
       <div style={{ paddingTop: "40px", height: "100%" }}>
         <MarkdownWrapper width={width} height={height - 40}>
           <Markdown
-            source={source}
+            source={contentWithoutTitle}
             onRelativeLinkClick={handleRelativeLinkClick}
             divHandler={divHandler}
           />
