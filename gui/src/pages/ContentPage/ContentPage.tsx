@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, FC } from "react";
+import { FunctionComponent, useCallback, FC, useState } from "react";
 import { useRoute, Route } from "../../Route";
 import Markdown from "../../Markdown/Markdown";
 import MarkdownWrapper from "../../Markdown/MarkdownWrapper";
@@ -46,53 +46,72 @@ type ContentPageProps = {
 
 type TopBarProps = {
   setRoute: (route: Route) => void;
-  currentPath: string;
 };
 
-const TopBar: FC<TopBarProps> = ({ setRoute, currentPath }) => {
-  const isHome = currentPath === "index.md";
+const TopBar: FC<TopBarProps> = ({ setRoute }) => {
+  const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [isTitleHovered, setIsTitleHovered] = useState(false);
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '40px',
-      backgroundColor: '#f5f5f5',
-      borderBottom: '1px solid #ddd',
-      display: 'flex',
-      alignItems: 'center',
-      padding: '0 20px',
-      zIndex: 1000
-    }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "40px",
+        backgroundColor: "#f5f5f5",
+        borderBottom: "1px solid #ddd",
+        display: "flex",
+        alignItems: "center",
+        padding: "0 20px",
+        zIndex: 1000,
+        gap: "16px",
+      }}
+    >
       <a
         href="#"
         onClick={(e) => {
           e.preventDefault();
-          if (!isHome) {
-            setRoute({ type: "content", d: "index.md" });
-          }
+          setRoute({ type: "content", d: "index.md" });
         }}
+        onMouseEnter={() => setIsLogoHovered(true)}
+        onMouseLeave={() => setIsLogoHovered(false)}
         style={{
-          ...(!isHome ? {
-            cursor: 'pointer',
-          } : {
-            cursor: 'default',
-            opacity: 0.5,
-            pointerEvents: isHome ? 'none' : 'auto',
-          }),
-          color: '#333',
-          textDecoration: 'none',
-          fontSize: '14px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px'
+          cursor: "pointer",
+          transition: "all 0.2s ease-in-out",
+          transform: isLogoHovered ? "scale(1.1)" : "scale(1)",
+          filter: isLogoHovered ? "brightness(1.2)" : "brightness(1)",
         }}
+        title="Go to home"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginTop: '1px' }}>
-          <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        <span>Home</span>
+        <img
+          src="icon.svg"
+          alt="Wavelets Logo"
+          style={{
+            height: "28px",
+            width: "28px",
+          }}
+        />
+      </a>
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          setRoute({ type: "content", d: "index.md" });
+        }}
+        onMouseEnter={() => setIsTitleHovered(true)}
+        onMouseLeave={() => setIsTitleHovered(false)}
+        style={{
+          fontSize: "18px",
+          fontWeight: 500,
+          color: isTitleHovered ? "#007bff" : "#333",
+          textDecoration: "none",
+          cursor: "pointer",
+          transition: "color 0.2s ease-in-out",
+        }}
+        title="Go to home"
+      >
+        Lossy Time Series Compression for Electrophysiology
       </a>
     </div>
   );
@@ -117,9 +136,9 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
     return <div>Content not found: {d}</div>;
   }
   return (
-    <div style={{ position: 'relative', height }}>
-      <TopBar setRoute={setRoute} currentPath={d} />
-      <div style={{ paddingTop: '40px', height: '100%' }}>
+    <div style={{ position: "relative", height }}>
+      <TopBar setRoute={setRoute} />
+      <div style={{ paddingTop: "40px", height: "100%" }}>
         <MarkdownWrapper width={width} height={height - 40}>
           <Markdown
             source={source}
