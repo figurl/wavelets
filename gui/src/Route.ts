@@ -1,9 +1,13 @@
 import { createContext, useContext } from "react";
 
-export type Route = {
-  type: "content";
-  p: string;
-};
+export type Route =
+  | {
+      type: "content";
+      d: string;
+    }
+  | {
+      type: "test";
+    };
 
 type RouteContextType = {
   route: Route;
@@ -11,7 +15,7 @@ type RouteContextType = {
 };
 
 export const RouteContext = createContext<RouteContextType>({
-  route: { type: "content", p: "" },
+  route: { type: "content", d: "" },
   setRoute: () => {},
 });
 

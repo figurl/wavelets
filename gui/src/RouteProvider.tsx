@@ -13,12 +13,19 @@ const RouteProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const route: Route = useMemo(() => {
     const queryParameters = new URLSearchParams(location.search);
     const p = queryParameters.get("p");
-    return { type: "content", p: p || "index.md" };
+    if (p === "test") {
+      return { type: "test" };
+    } else {
+      const d = queryParameters.get("d");
+      return { type: "content", d: d || "index.md" };
+    }
   }, [location.search]);
   const setRoute = useCallback(
     (route: Route) => {
       if (route.type === "content") {
-        navigate(`?p=${route.p}`);
+        navigate(`?d=${route.d}`);
+      } else if (route.type === "test") {
+        navigate(`?p=test`);
       }
     },
     [navigate],
