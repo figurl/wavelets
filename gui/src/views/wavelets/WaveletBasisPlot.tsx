@@ -8,12 +8,14 @@ type WaveletBasisPlotProps = {
   wavelet: string;
   coeffSizes: number[];
   level: number;
+  maxWidth?: number;
 };
 
 export const WaveletBasisPlot: FunctionComponent<WaveletBasisPlotProps> = ({
   wavelet,
   coeffSizes,
   level,
+  maxWidth,
 }) => {
   const code = `
 ${removeMainSectionFromPy(wavelets_py)}
@@ -34,6 +36,7 @@ basis_wavelets = get_basis_wavelets(
         level={level}
         basisWavelets={r.basis_wavelets}
         waveletName={wavelet}
+        maxWidth={maxWidth}
       />
     </div>
   );
@@ -43,14 +46,16 @@ type WaveletBasisPlotChildProps = {
   waveletName: string;
   level: number;
   basisWavelets: number[][];
+  maxWidth?: number;
 };
 
 const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
   waveletName,
   basisWavelets,
   level,
+  maxWidth,
 }) => {
-  const width = 400;
+  const width = Math.max(400, maxWidth || 0);
   const height = 300;
   const { data, layout } = useMemo(() => {
     const centerIndex = Math.floor(basisWavelets.length / 2);
@@ -79,7 +84,7 @@ const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
       },
     ];
     const layout = {
-      width,
+      width: width - 50,
       height,
       title: `Basis ${waveletName} wavelets at level ${level}`,
       margin: {
@@ -101,6 +106,6 @@ const WaveletBasisPlotChild: FunctionComponent<WaveletBasisPlotChildProps> = ({
       showlegend: false,
     };
     return { data, layout };
-  }, [basisWavelets, level, waveletName]);
+  }, [basisWavelets, level, waveletName, width, height]);
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };

@@ -11,7 +11,10 @@ const MarkdownWrapper: FunctionComponent<
 > = ({ children, width, height }) => {
   return (
     <ProvideDocumentWidth width={width}>
-      <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
+      <div
+        className="MarkdownWrapper"
+        style={{ position: "absolute", width, height, overflowY: "auto" }}
+      >
         <div style={{ padding: 10 }}>{children}</div>
       </div>
     </ProvideDocumentWidth>
