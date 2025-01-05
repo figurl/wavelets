@@ -2,10 +2,11 @@ import { FunctionComponent, useCallback, useMemo } from "react";
 import { useRoute } from "../../Route";
 import Markdown from "../../internal/Markdown/Markdown";
 import MarkdownWrapper from "../../internal/Markdown/MarkdownWrapper";
-import divHandler from "../../internal/divHandler/divHandler";
+import divHandler from "./divHandler";
 import TopBar from "./TopBar";
 import Splitter from "../../internal/components/Splitter";
 import FileTree from "./FileTree";
+import codeHandler from "./codeHandler";
 
 // Import all markdown files from content directory
 const mdModules = import.meta.glob<{ default: string }>(
@@ -98,6 +99,7 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
               source={contentWithoutTitle}
               onRelativeLinkClick={handleRelativeLinkClick}
               divHandler={divHandler}
+              codeHandler={codeHandler}
             />
           </MarkdownWrapper>
         </Splitter>

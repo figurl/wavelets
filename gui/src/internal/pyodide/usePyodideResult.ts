@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { getCachedValue, setCachedValue } from "../utils/indexedDbCache";
 import { pyodideRun } from "./pyodideRun";
+import { InterpreterStatus } from "./pyodideWorkerTypes";
 
 const CACHE_VERSION = 1;
 const CACHE_KEY_PREFIX = "pyodideResult";
@@ -30,6 +31,10 @@ export const usePyodideResult = (
   },
 ) => {
   const [result, setResult] = useState<any>(undefined);
+  const [images, setImages] = useState<any[] | undefined>(undefined);
+  const [status, setStatus] = useState<InterpreterStatus | undefined>(
+    undefined,
+  );
   const additionalFilesJson = o.additionalFiles
     ? JSON.stringify(o.additionalFiles)
     : undefined;
@@ -40,15 +45,19 @@ export const usePyodideResult = (
         setResult(null);
         return;
       }
+      setStatus(undefined);
       setResult(undefined);
+      setImages(undefined);
       const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(JSON.stringify({ code, additionalFilesJson }))}`;
       if (o.readCache ?? true) {
-        const x = await getCachedValue(key);
-        if (x) {
-          setResult(x);
+        const x: any = await getCachedValue(key);
+        if (x && typeof x === "object" && "result" in x && "images" in x) {
+          setResult(x.result);
+          setImages(x.images);
           return;
         }
       }
+      const imageList: any[] = [];
       const result = await pyodideRun(
         code,
         {
@@ -60,21 +69,26 @@ export const usePyodideResult = (
           },
           onStatus(status) {
             console.log("status", status);
+            setStatus(status);
+          },
+          onImage(image) {
+            imageList.push(image);
           },
         },
         additionalFilesJson ? JSON.parse(additionalFilesJson) : undefined,
       );
       if (canceled) return;
       if (o.writeCache ?? true) {
-        await setCachedValue(key, result);
+        await setCachedValue(key, { result, images: imageList });
       }
       if (canceled) return;
       setResult(result);
+      setImages(imageList);
     };
     run();
     return () => {
       canceled = true;
     };
   }, [code, o.readCache, o.writeCache, additionalFilesJson]);
-  return result;
+  return { result, images, status };
 };

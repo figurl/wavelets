@@ -26,7 +26,7 @@ basis_wavelets = get_basis_wavelets(
 )
 {'basis_wavelets': basis_wavelets}
 `;
-  const r = usePyodideResult(code);
+  const { result: r } = usePyodideResult(code);
   if (!r?.basis_wavelets) {
     return <div>Computing...</div>;
   }

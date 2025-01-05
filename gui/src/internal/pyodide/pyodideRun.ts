@@ -19,6 +19,7 @@ type PyodideCallbacks = {
   onStdout: (data: string) => void;
   onStderr: (data: string) => void;
   onStatus: (status: InterpreterStatus) => void;
+  onImage?: (image: any) => void;
 };
 
 /**
@@ -79,6 +80,10 @@ class PyodideWorkerManager {
           this.currentCallbacks.onStdout(msg.data);
         } else if (msg.type === "stderr") {
           this.currentCallbacks.onStderr(msg.data);
+        } else if (msg.type === "addImage") {
+          if (this.currentCallbacks.onImage) {
+            this.currentCallbacks.onImage(msg.image);
+          }
         }
       }
       if (msg.type === "setResultJson") {

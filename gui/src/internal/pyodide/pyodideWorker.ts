@@ -5,6 +5,7 @@ import {
   MessageFromPyodideWorker,
 } from "./pyodideWorkerTypes";
 // import spDrawsScript from "./sp_load_draws.py?raw";
+import spMPLScript from "./sp_patch_matplotlib.py?raw";
 
 let pyodide: PyodideInterface | null = null;
 
@@ -65,9 +66,9 @@ const loadPyodideInstance = async () => {
     // pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript, {
     //   encoding: "utf-8",
     // });
-    // pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript, {
-    //   encoding: "utf-8",
-    // });
+    pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript, {
+      // encoding: "utf-8",
+    });
 
     console.info(`Pyodide loaded in ${(Date.now() - timer) / 1000} seconds`);
 
@@ -96,8 +97,12 @@ const setStatus = (status: InterpreterStatus) => {
 const sendResult = (result: any) => {
   sendMessageToMain({
     type: "setResultJson",
-    resultJson: JSON.stringify(result),
+    resultJson: JSON.stringify(result ?? null),
   });
+};
+
+const addImage = (image: any) => {
+  sendMessageToMain({ type: "addImage", image });
 };
 
 self.onmessage = async (e) => {
@@ -130,6 +135,7 @@ const run = async (
       const packageFutures = [];
       const micropip = pyodide.pyimport("micropip");
       packageFutures.push(micropip.install("pyodide-http"));
+      packageFutures.push(pyodide.loadPackage("matplotlib"));
       // packageFutures.push(micropip.install("stanio"));
       packageFutures.push(pyodide.loadPackagesFromImports(script));
       for (const f of packageFutures) {
@@ -154,8 +160,18 @@ const run = async (
         }
       }
 
-      let result = await pyodide.runPythonAsync(script, {
-        globals: undefined,
+      const scriptPreamble = `
+from sp_patch_matplotlib import patch_matplotlib
+patch_matplotlib(_SP_ADD_IMAGE)
+`;
+      const globalsJS: { [key: string]: any } = {};
+      globalsJS._SP_ADD_IMAGE = addImage;
+      const globals = pyodide.toPy(globalsJS);
+
+      const script2 = scriptPreamble + "\n" + script;
+
+      let result = await pyodide.runPythonAsync(script2, {
+        globals,
         filename: "_script.py",
       });
       succeeded = true;

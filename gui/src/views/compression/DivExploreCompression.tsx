@@ -29,7 +29,19 @@ export const useCompressionResult = (o: {
   filtHighcut?: number;
   signalType: SignalType;
   nrmses: number[];
-}) => {
+}):
+  | {
+      sampling_frequency: number;
+      original: number[];
+      compressed: {
+        quant_scale_factor: number;
+        nrmse_target: number;
+        nrmse: number;
+        compressed: number[];
+        compression_ratio: number;
+      }[];
+    }
+  | undefined => {
   const {
     waveletName,
     numSamples,
@@ -61,19 +73,7 @@ test_compression(
       },
     } as { [filename: string]: string | { base64: string } };
   }, [signalFile]);
-  const result:
-    | {
-        sampling_frequency: number;
-        original: number[];
-        compressed: {
-          quant_scale_factor: number;
-          nrmse_target: number;
-          nrmse: number;
-          compressed: number[];
-          compression_ratio: number;
-        }[];
-      }
-    | undefined = usePyodideResult(
+  const { result } = usePyodideResult(
     additionalFiles !== undefined ? code : null,
     {
       additionalFiles,

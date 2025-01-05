@@ -54,6 +54,10 @@ export type MessageFromPyodideWorker =
       status: InterpreterStatus;
     }
   | {
+      type: "addImage";
+      image: any;
+    }
+  | {
       type: "setResultJson";
       resultJson: string;
     };
@@ -65,6 +69,7 @@ export const isMessageFromPyodideWorker = (
   if (x.type === "stdout") return x.data !== undefined;
   if (x.type === "stderr") return x.data !== undefined;
   if (x.type === "setStatus") return isInterpreterStatus(x.status);
+  if (x.type === "addImage") return x.image !== undefined;
   if (x.type === "setResultJson") return typeof x.resultJson === "string";
   return false;
 };

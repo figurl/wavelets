@@ -12,6 +12,6 @@ ${removeMainSectionFromPy(wavelets_py)}
 coeff_sizes = get_coeff_sizes(n=${n}, wavelet='${wavelet}')
 {'coeff_sizes': coeff_sizes}
 `;
-  const r = usePyodideResult(code);
+  const { result: r } = usePyodideResult(code);
   return r ? r.coeff_sizes : undefined;
 };

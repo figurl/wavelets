@@ -82,7 +82,10 @@ plt.show()
     [numSamples, selectedWavelets],
   );
 
-  const results = usePyodideResult(pythonCode, { readCache, writeCache: true });
+  const { result: results } = usePyodideResult(pythonCode, {
+    readCache,
+    writeCache: true,
+  });
 
   if (!results) {
     return <div>Computing...</div>;

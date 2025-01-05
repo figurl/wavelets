@@ -29,6 +29,10 @@ type Props = {
     props: any;
     children: any;
   }) => JSX.Element;
+  codeHandler?: (args: {
+    code: string;
+    codeElement: JSX.Element;
+  }) => JSX.Element;
 };
 
 const Markdown: FunctionComponent<Props> = ({
@@ -40,6 +44,7 @@ const Markdown: FunctionComponent<Props> = ({
   files,
   linkTarget,
   divHandler,
+  codeHandler,
 }) => {
   const components: Partial<
     Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents
@@ -49,42 +54,48 @@ const Markdown: FunctionComponent<Props> = ({
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const [copied, setCopied] = useState<boolean>(false);
         const match = /language-(\w+)/.exec(className || "");
-        return !inline && match ? (
-          <>
-            <div>
-              <SmallIconButton
-                icon={<CopyAll />}
-                title="Copy code"
-                onClick={() => {
-                  navigator.clipboard.writeText(String(children));
-                  setCopied(true);
-                }}
-              />
-              {copied && <>&nbsp;copied</>}
-              {onRunCode && (
-                <span style={{ color: runCodeReady ? "black" : "lightgray" }}>
-                  <SmallIconButton
-                    icon={<PlayArrow />}
-                    title="Run code"
-                    onClick={() => {
-                      const code = String(children);
-                      onRunCode(code);
-                    }}
-                    disabled={!runCodeReady}
-                  />
-                </span>
-              )}
-            </div>
-            {/* @ts-expect-error - SyntaxHighlighter has incompatible types with React 18.3 */}
-            <SyntaxHighlighter style={darcula} language={match[1]}>
-              {String(children).replace(/\n$/, "")}
-            </SyntaxHighlighter>
-          </>
-        ) : (
-          <code className={className} {...props}>
-            {children}
-          </code>
-        );
+        const codeElement =
+          !inline && match ? (
+            <>
+              <div>
+                <SmallIconButton
+                  icon={<CopyAll />}
+                  title="Copy code"
+                  onClick={() => {
+                    navigator.clipboard.writeText(String(children));
+                    setCopied(true);
+                  }}
+                />
+                {copied && <>&nbsp;copied</>}
+                {onRunCode && (
+                  <span style={{ color: runCodeReady ? "black" : "lightgray" }}>
+                    <SmallIconButton
+                      icon={<PlayArrow />}
+                      title="Run code"
+                      onClick={() => {
+                        const code = String(children);
+                        onRunCode(code);
+                      }}
+                      disabled={!runCodeReady}
+                    />
+                  </span>
+                )}
+              </div>
+              {/* @ts-expect-error - SyntaxHighlighter has incompatible types with React 18.3 */}
+              <SyntaxHighlighter style={darcula} language={match[1]}>
+                {String(children).replace(/\n$/, "")}
+              </SyntaxHighlighter>
+            </>
+          ) : (
+            <code className={className} {...props}>
+              {children}
+            </code>
+          );
+        if (codeHandler) {
+          return codeHandler({ code: String(children), codeElement });
+        } else {
+          return codeElement;
+        }
       },
       div: ({ node, className, children, ...props }) => {
         if (divHandler) {
