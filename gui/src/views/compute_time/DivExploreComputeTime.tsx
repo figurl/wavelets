@@ -1,15 +1,24 @@
-import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useDocumentWidth } from "../../internal/Markdown/DocumentWidthContext";
 import Markdown from "../../internal/Markdown/Markdown";
 import LazyPlotlyPlot from "../../internal/Plotly/LazyPlotlyPlot";
 import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
 import code1 from "./compute_time.py?raw";
+import doWavelibBenchmark from "./doWavelibBenchmark";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type DivExploreComputeTimeProps = {
   //
 };
+
+const implementationOptions = ["pywavelets-pyodide", "wavelib-wasm"] as const;
 
 const waveletOptions = {
   option0: ["fourier"],
@@ -29,14 +38,22 @@ export const DivExploreComputeTime: FunctionComponent<
   const [selectedWavelets, setSelectedWavelets] =
     useState<keyof typeof waveletOptions>("option2");
   const [readCache, setReadCache] = useState(true);
+  const [implementation, setImplementation] =
+    useState<(typeof implementationOptions)[number]>("pywavelets-pyodide");
   const width = useDocumentWidth();
 
   const toggleCache = useCallback(() => {
     setReadCache((prev) => !prev);
   }, []);
 
-  const pythonCode = useMemo(
-    () => `
+  const pythonCode = useMemo(() => {
+    if (implementation === "wavelib-wasm") {
+      return `
+print("Using wavelib-wasm")
+[]
+`;
+    }
+    return `
 ${removeMainSectionFromPy(code1)}
 results = [
   benchmark_compute_time(
@@ -46,17 +63,22 @@ results = [
   for wavelet_name in ${JSON.stringify(waveletOptions[selectedWavelets])}
 ]
 results
-`,
-    [numSamples, selectedWavelets],
-  );
+`;
+  }, [numSamples, selectedWavelets, implementation]);
 
-  const pythonCodeForDisplay = useMemo(
-    () => `
+  const pythonCodeForDisplay = useMemo(() => {
+    if (implementation === "wavelib-wasm") {
+      return `
+print("Using wavelib-wasm")
+[]
+`;
+    }
+    return `
 ${removeMainSectionFromPy(code1)}
 results = [
   benchmark_compute_time(
     wavelet_name=wavelet_name,
-    num_samples=${numSamples}
+    num_samples=${numSamples},
   )
   for wavelet_name in ${JSON.stringify(waveletOptions[selectedWavelets])}
 ]
@@ -74,18 +96,31 @@ plt.bar(x + width/2, [r['rec_computation_time_msec'] for r in results], width, l
 
 plt.xlabel('Wavelet Name')
 plt.ylabel('Time (ms)')
-plt.title('Computation Time Comparison')
+plt.title(f'Computation Time Comparison')
 plt.xticks(x, wavelet_names)
 plt.legend()
 plt.show()
-`,
-    [numSamples, selectedWavelets],
-  );
+`;
+  }, [numSamples, selectedWavelets, implementation]);
 
   const { result: results } = usePyodideResult(pythonCode, {
     readCache,
     writeCache: true,
   });
+
+  // test wavelib-wasm
+  useEffect(() => {
+    if (implementation === "wavelib-wasm") {
+      console.info("Benchmarking wavelib-wasm");
+      doWavelibBenchmark({
+        numSamples,
+        waveletNames: waveletOptions[selectedWavelets],
+      }).then((output) => {
+        console.info("Benchmarking wavelib-wasm done");
+        console.info(output);
+      });
+    }
+  }, [implementation, numSamples, selectedWavelets]);
 
   if (!results) {
     return <div>Computing...</div>;
@@ -120,6 +155,23 @@ plt.show()
             ))}
           </select>
         </div>
+        <div>
+          <label>Implementation:&nbsp;</label>
+          <select
+            value={implementation}
+            onChange={(e) =>
+              setImplementation(
+                e.target.value as (typeof implementationOptions)[number],
+              )
+            }
+          >
+            {implementationOptions.map((impl) => (
+              <option key={impl} value={impl}>
+                {impl}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           onClick={toggleCache}
           style={{ padding: "4px 8px" }}
@@ -133,6 +185,7 @@ plt.show()
         results={results}
         width={Math.min(width, 600)}
         height={300}
+        implementation={implementation}
       />
       <hr />
       <div>
@@ -154,6 +207,7 @@ type ComputationTimePlotProps = {
   }>;
   width: number;
   height: number;
+  implementation: string;
 };
 
 const ComputationTimePlot: FunctionComponent<ComputationTimePlotProps> = ({

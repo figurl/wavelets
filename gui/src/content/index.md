@@ -4,18 +4,20 @@ With the increasing sizes of data for extracellular electrophysiology, it is cru
 
 In this site, we explore and analyze three methods for lossy compression of time series data which we call:
 
-* Quantized Fourier Compression (QFC)
-* Quantized Wavelet Compression (QWC)
-* Quantized Time Domain Compression (QTC)
+- Quantized Fourier Compression (QFC)
+- Quantized Wavelet Compression (QWC)
+- Quantized Time Domain Compression (QTC)
 
 All three methods involve the following steps for compression:
-* Transform the time series data to a different domain (or keep it in the time domain for QTC)
-* Quantize the transformed data to lower the information energy (this is where the loss occurs)
-* Compress the quantized data using a lossy method such as zlib
+
+- Transform the time series data to a different domain (or keep it in the time domain for QTC)
+- Quantize the transformed data to lower the information energy (this is where the loss occurs)
+- Compress the quantized data using a lossy method such as zlib
 
 The to reconstruct an approximation of the original signal, the following steps are taken:
-* Decompress the quantized data
-* Transform the data back to the time domain (or keep it in the time domain for QTC)
+
+- Decompress the quantized data
+- Transform the data back to the time domain (or keep it in the time domain for QTC)
 
 For QFC, the transform is the Discrete Fourier Transform (DFT), for QWC it is the Discrete Wavelet Transform (DWT), and for QTC it is the identity transformation. In all cases, quantization involves the choice of a quantization step size, which is a tradeoff between the compression ratio and the error introduced by quantization. The entropy of the system then determines the theoretically achievable compression ratio. The different lossless compression methods (e.g., zlib, ZStandard) will be evaluated to see how close they can get to this theoretical limit.
 
