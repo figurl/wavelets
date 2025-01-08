@@ -30,7 +30,6 @@ const TestPage: FunctionComponent<Props> = ({ width, height }) => {
         "RemoteFile.py": RemoteFile_py,
       },
     );
-    console.log("--- x", x);
   }, []);
   return (
     <MarkdownWrapper width={Math.min(800, width)} height={height}>

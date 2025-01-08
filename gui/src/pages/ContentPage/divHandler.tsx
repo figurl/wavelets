@@ -30,7 +30,6 @@ const divHandler = ({
   props: any;
   children: any;
 }) => {
-  console.log("--- className:", className, divComponents);
   // Use className directly as the component name
   if (className && divComponents[className]) {
     const Component = divComponents[className];

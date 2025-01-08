@@ -6058,10 +6058,10 @@ react-icons@^5.2.1:
   resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-5.4.0.tgz#443000f6e5123ee1b21ea8c0a716f6e7797f7416"
   integrity sha512-7eltJxgVt7X64oHh6wSWNwwbKTCtMfK35hcjvJS0yxEAhPM8oUKdS3+kqaW1vicIltw+kR2unHaa12S9pPALoQ==
 
-react-intersection-observer@^9.13.0:
-  version "9.14.0"
-  resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.14.0.tgz#37bf6fbfbbb03bae55db50dfae79118b29b180d8"
-  integrity sha512-AYqlmDZn85VUmlODwYym9y5OlqY2cFyIu41dkN0GJWvhdbd19Mh16mz5IH6fO1gp5V4FfQOO4m0zGc04Tj13rQ==
+react-intersection-observer@^9.14.1:
+  version "9.14.1"
+  resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.14.1.tgz#c9d42576d64dfde18336acdcdf097761fb79ad19"
+  integrity sha512-k1xIUn3sCQi3ugNeF64FJb3zwve5mcetvAUR9JazXeOmtap4IP2evN8rs+yf6SQ7F1QydsOGiqTmt+lySKZ9uA==
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
@@ -7420,6 +7420,11 @@ w3c-xmlserializer@^4.0.0:
   integrity sha512-d+BFHzbiCx6zGfz0HyQ6Rg69w9k19nviJspaj4yNscGjrHu94sVP+aRm75yEbCh+r2/yR+7q6hux9LVtbuTGBw==
   dependencies:
     xml-name-validator "^4.0.0"
+
+wasmlets@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/wasmlets/-/wasmlets-0.0.2.tgz#39d2233d19ee7cf9cf9b4d1eeda4a359eb7967f7"
+  integrity sha512-btmCIYhoqqODU1VkSRDNP4IehTYxTCVGmavqLgO1763GkukUMt/3f+J7BhmKue0jV4wLBU41splDt9dm6fiJGw==
 
 weak-map@^1.0.5:
   version "1.0.8"

@@ -39,6 +39,7 @@ export const useCompressionResult = (o: {
         nrmse: number;
         compressed: number[];
         compression_ratio: number;
+        theoretical_compression_ratio: number;
       }[];
     }
   | undefined => {
@@ -144,20 +145,30 @@ const DivExploreCompression: FunctionComponent<
         width={Math.min(width, 600)}
         height={300}
       />
-      {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
-        <CompressionPlot
-          key={i}
-          title={`NRMSE: ${
-            Math.round(nrmse * 100) / 100
-          }; Compression ratio: ${compression_ratio.toFixed(2)}`}
-          samplingFrequency={result.sampling_frequency}
-          original={result.original.slice(0, numSamples)}
-          compressed={compressed.slice(0, numSamples)}
-          width={width - 30} // leave room for scrollbar
-          height={400}
-          mode={plotMode}
-        />
-      ))}
+      {result.compressed.map(
+        (
+          {
+            nrmse,
+            compressed,
+            compression_ratio,
+            theoretical_compression_ratio,
+          },
+          i,
+        ) => (
+          <CompressionPlot
+            key={i}
+            title={`NRMSE: ${
+              Math.round(nrmse * 100) / 100
+            }; Compression ratio: ${compression_ratio.toFixed(2)}; Theoretical compression ratio: ${theoretical_compression_ratio.toFixed(2)}`}
+            samplingFrequency={result.sampling_frequency}
+            original={result.original.slice(0, numSamples)}
+            compressed={compressed.slice(0, numSamples)}
+            width={width - 30} // leave room for scrollbar
+            height={400}
+            mode={plotMode}
+          />
+        ),
+      )}
     </div>
   );
 };

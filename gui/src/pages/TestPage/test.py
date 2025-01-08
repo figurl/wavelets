@@ -8,7 +8,6 @@ import os
 temp_file = tempfile.NamedTemporaryFile(delete=False)
 temp_file.close()
 temp_file_path = temp_file.name
-print('--- created temporary file', temp_file_path)
 
 class WrappedFile:
     def __init__(self, file):

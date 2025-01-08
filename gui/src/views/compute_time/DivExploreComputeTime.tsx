@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FunctionComponent,
   useCallback,
@@ -11,14 +12,14 @@ import LazyPlotlyPlot from "../../internal/Plotly/LazyPlotlyPlot";
 import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
 import code1 from "./compute_time.py?raw";
-import doWavelibBenchmark from "./doWavelibBenchmark";
+import doWasmletsBenchmark from "./doWasmletsBenchmark";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type DivExploreComputeTimeProps = {
   //
 };
 
-const implementationOptions = ["pywavelets-pyodide", "wavelib-wasm"] as const;
+const implementationOptions = ["pywavelets-pyodide", "wasmlets"] as const;
 
 const waveletOptions = {
   option0: ["fourier"],
@@ -47,11 +48,8 @@ export const DivExploreComputeTime: FunctionComponent<
   }, []);
 
   const pythonCode = useMemo(() => {
-    if (implementation === "wavelib-wasm") {
-      return `
-print("Using wavelib-wasm")
-[]
-`;
+    if (implementation === "wasmlets") {
+      return null;
     }
     return `
 ${removeMainSectionFromPy(code1)}
@@ -67,9 +65,9 @@ results
   }, [numSamples, selectedWavelets, implementation]);
 
   const pythonCodeForDisplay = useMemo(() => {
-    if (implementation === "wavelib-wasm") {
+    if (implementation === "wasmlets") {
       return `
-print("Using wavelib-wasm")
+print("Using wasmlets")
 []
 `;
     }
@@ -103,24 +101,38 @@ plt.show()
 `;
   }, [numSamples, selectedWavelets, implementation]);
 
-  const { result: results } = usePyodideResult(pythonCode, {
+  const { result: resultsPyodide } = usePyodideResult(pythonCode, {
     readCache,
     writeCache: true,
   });
 
-  // test wavelib-wasm
+  const [resultsWasmlets, setResultsWasmlets] = useState<any | null>(null);
   useEffect(() => {
-    if (implementation === "wavelib-wasm") {
-      console.info("Benchmarking wavelib-wasm");
-      doWavelibBenchmark({
-        numSamples,
-        waveletNames: waveletOptions[selectedWavelets],
-      }).then((output) => {
-        console.info("Benchmarking wavelib-wasm done");
-        console.info(output);
-      });
+    let canceled = false;
+    if (implementation === "wasmlets") {
+      console.info("Benchmarking wasmlets");
+      const load = async () => {
+        setResultsWasmlets(null);
+        const x = await doWasmletsBenchmark({
+          numSamples,
+          waveletNames: waveletOptions[selectedWavelets],
+        });
+        if (canceled) {
+          return;
+        }
+        setResultsWasmlets(x);
+      };
+      load();
+    } else {
+      setResultsWasmlets(null);
     }
+    return () => {
+      canceled = true;
+    };
   }, [implementation, numSamples, selectedWavelets]);
+
+  const results =
+    implementation === "wasmlets" ? resultsWasmlets : resultsPyodide;
 
   if (!results) {
     return <div>Computing...</div>;

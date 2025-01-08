@@ -84,7 +84,12 @@ def test_compression(*,
             compressed_size = len(zstandard_compress(np.concatenate(coeffs_quantized).tobytes()))
         else:
             raise ValueError(f'Unknown lossless compression method: {lossless_compression_method}')
+        values, value_counts = np.unique(np.concatenate(coeffs_quantized), return_counts=True)
+        value_freqs = value_counts / sum(value_counts)
+        entropy = -sum([a * np.log2(a) for a in value_freqs])  # entropy in bits per sample
+        theoretical_compressed_size = entropy * len(np.concatenate(coeffs_quantized)) / 8
         compression_ratio = original_size / compressed_size
+        theoretical_compression_ratio = original_size / theoretical_compressed_size
         nrmse_actual = compute_nrmse(original, compressed, estimated_noise_level)
 
         number_of_zeros = sum([np.sum(c == 0) for c in coeffs_quantized])
@@ -96,7 +101,8 @@ def test_compression(*,
             'nrmse_target': nrmse,
             'nrmse': nrmse_actual,
             'compressed': compressed.tolist(),
-            'compression_ratio': compression_ratio
+            'compression_ratio': compression_ratio,
+            'theoretical_compression_ratio': theoretical_compression_ratio,
         })
     return {
         'sampling_frequency': sampling_frequency,
@@ -262,6 +268,7 @@ if __name__ == '__main__':
         nrmses=[0.1, 0.2],
         filt_lowcut=300,
         filt_highcut=3000,
+        signal_type='gaussian_noise',
     )
     original = x['original']
     num = len(x['compressed'])
