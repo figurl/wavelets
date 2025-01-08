@@ -138,6 +138,12 @@ plt.show()
     return <div>Computing...</div>;
   }
 
+  const handleDownloadCSV = () => {
+    const csvContent = resultsToCSV(results);
+    const fileName = `wavelet-benchmark-${implementation}-${numSamples}.csv`;
+    downloadCSV(csvContent, fileName);
+  };
+
   return (
     <div>
       <div
@@ -199,6 +205,15 @@ plt.show()
         height={300}
         implementation={implementation}
       />
+      <div style={{ marginTop: 10, marginBottom: 10 }}>
+        <button
+          onClick={handleDownloadCSV}
+          style={{ padding: "4px 8px" }}
+          title="Download results as CSV"
+        >
+          Download CSV
+        </button>
+      </div>
       <hr />
       <div>
         <details>
@@ -300,6 +315,39 @@ const NumSamplesSelector: FunctionComponent<NumSamplesSelectorProps> = ({
 
 const toScientific = (num: number) => {
   return num.toExponential(1);
+};
+
+const resultsToCSV = (
+  results: Array<{
+    dec_computation_time_msec: number;
+    rec_computation_time_msec: number;
+    num_samples: number;
+    wavelet_name: string;
+  }>,
+) => {
+  const headers = [
+    "Wavelet Name",
+    "Decomposition Time (ms)",
+    "Reconstruction Time (ms)",
+    "Number of Samples",
+  ];
+  const rows = results.map((r) => [
+    r.wavelet_name,
+    r.dec_computation_time_msec.toString(),
+    r.rec_computation_time_msec.toString(),
+    r.num_samples.toString(),
+  ]);
+  return [headers, ...rows].map((row) => row.join(",")).join("\n");
+};
+
+const downloadCSV = (csvContent: string, fileName: string) => {
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 export default DivExploreComputeTime;

@@ -7421,10 +7421,10 @@ w3c-xmlserializer@^4.0.0:
   dependencies:
     xml-name-validator "^4.0.0"
 
-wasmlets@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/wasmlets/-/wasmlets-0.0.2.tgz#39d2233d19ee7cf9cf9b4d1eeda4a359eb7967f7"
-  integrity sha512-btmCIYhoqqODU1VkSRDNP4IehTYxTCVGmavqLgO1763GkukUMt/3f+J7BhmKue0jV4wLBU41splDt9dm6fiJGw==
+wasmlets@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/wasmlets/-/wasmlets-0.0.3.tgz#766f13c4a80013523057f1d29851ef15a10b4e39"
+  integrity sha512-NVfOj7FXs2AzDscfvPAHPb2QQwIhSdLPosVJJxPhYpFOzltScY9dSpKcxpY9UZRgUW2r1/WqMrGXsUMYxxOxHQ==
 
 weak-map@^1.0.5:
   version "1.0.8"

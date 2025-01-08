@@ -48,7 +48,7 @@
     "rehype-raw": "^6.1.1",
     "remark-gfm": "^3.0.1",
     "remark-math": "^5.1.1",
-    "wasmlets": "^0.0.2"
+    "wasmlets": "0.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

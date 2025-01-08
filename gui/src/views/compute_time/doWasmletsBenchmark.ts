@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { wavedec, init, Wavelet } from "wasmlets";
-import { waverec } from "./wavelib";
+import { wavedec, waverec, init, Wavelet } from "wasmlets";
 
 const doWasmletsBenchmark = async (o: {
   numSamples: number;
