@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { loadMemo, saveMemo } from "../Memobin";
+import { memobinApiKeyHasBeenSet } from "../Memobin/memobin";
+
 interface CacheEntry {
   result: any;
   size: number;
@@ -61,8 +64,15 @@ const purgeCacheIfNeeded = async (db: IDBDatabase): Promise<void> => {
   }
 };
 
-export const getCachedValue = async (key: string) => {
+export const getCachedValue = async (
+  key: string,
+  opts?: { skipMemobin?: boolean },
+) => {
   try {
+    if (!opts?.skipMemobin) {
+      const v = await loadMemo(key);
+      if (v) return JSON.parse(v);
+    }
     const db = await openDatabase();
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
@@ -81,7 +91,28 @@ export const getCachedValue = async (key: string) => {
   }
 };
 
-export const setCachedValue = async (key: string, result: any) => {
+export const clearCache = async () => {
+  try {
+    const db = await openDatabase();
+    const transaction = db.transaction(STORE_NAME, "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+    await new Promise<void>((resolve, reject) => {
+      const request = store.clear();
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+    console.log("Cache cleared successfully");
+  } catch (error) {
+    console.error("Error clearing cache:", error);
+    throw error;
+  }
+};
+
+export const setCachedValue = async (
+  key: string,
+  result: any,
+  opts?: { skipMemobin?: boolean },
+) => {
   try {
     const db = await openDatabase();
     const transaction = db.transaction(STORE_NAME, "readwrite");
@@ -98,6 +129,10 @@ export const setCachedValue = async (key: string, result: any) => {
 
     // Check and purge cache if needed
     await purgeCacheIfNeeded(db);
+
+    if (!opts?.skipMemobin && memobinApiKeyHasBeenSet()) {
+      await saveMemo(key, JSON.stringify(result));
+    }
   } catch (error) {
     console.error("Error setting cache:", error);
   }

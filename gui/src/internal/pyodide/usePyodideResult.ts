@@ -23,10 +23,12 @@ export const usePyodideResult = (
   o: {
     readCache?: boolean;
     writeCache?: boolean;
+    skipMemobin?: boolean;
     additionalFiles?: { [key: string]: string | { base64: string } };
   } = {
     readCache: undefined,
     writeCache: undefined,
+    skipMemobin: undefined,
     additionalFiles: undefined,
   },
 ) => {
@@ -50,7 +52,9 @@ export const usePyodideResult = (
       setImages(undefined);
       const key = `${CACHE_KEY_PREFIX}/${CACHE_VERSION}/${codeHash(JSON.stringify({ code, additionalFilesJson }))}`;
       if (o.readCache ?? true) {
-        const x: any = await getCachedValue(key);
+        const x: any = await getCachedValue(key, {
+          skipMemobin: o.skipMemobin,
+        });
         if (x && typeof x === "object" && "result" in x && "images" in x) {
           setResult(x.result);
           setImages(x.images);
@@ -73,22 +77,26 @@ export const usePyodideResult = (
           },
           onImage(image) {
             imageList.push(image);
+            setImages([...imageList]);
           },
         },
         additionalFilesJson ? JSON.parse(additionalFilesJson) : undefined,
       );
       if (canceled) return;
       if (o.writeCache ?? true) {
-        await setCachedValue(key, { result, images: imageList });
+        await setCachedValue(
+          key,
+          { result, images: imageList },
+          { skipMemobin: o.skipMemobin },
+        );
       }
       if (canceled) return;
       setResult(result);
-      setImages(imageList);
     };
     run();
     return () => {
       canceled = true;
     };
-  }, [code, o.readCache, o.writeCache, additionalFilesJson]);
+  }, [code, o.readCache, o.writeCache, o.skipMemobin, additionalFilesJson]);
   return { result, images, status };
 };

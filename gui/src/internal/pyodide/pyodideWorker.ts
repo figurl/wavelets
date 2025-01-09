@@ -55,7 +55,15 @@ const loadPyodideInstance = async () => {
         stderr: (x: string) => {
           sendStderr(x);
         },
-        packages: ["numpy", "requests", "h5py", "micropip", "PyWavelets", "zstandard", "lzma"],
+        packages: [
+          "numpy",
+          "requests",
+          "h5py",
+          "micropip",
+          "PyWavelets",
+          "zstandard",
+          "lzma",
+        ],
       });
     } finally {
       // Restore original fetch
@@ -169,7 +177,7 @@ const run = async (
             }
           }
         } catch (e) {
-          console.error('Error writing additional files');
+          console.error("Error writing additional files");
           throw e;
         }
       }

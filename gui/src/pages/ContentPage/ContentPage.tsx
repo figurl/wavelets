@@ -73,7 +73,6 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
 
   // Get content without the title line for rendering
   const contentFiltered = useMemo(() => {
-
     // if we want to remove te title
     // const lines = source?.split('\n') || [];
     // if (lines.length > 0 && lines[0].trim().startsWith('#')) {

@@ -101,9 +101,12 @@ plt.show()
 `;
   }, [numSamples, selectedWavelets, implementation]);
 
+  // Skip memobin (cloud) cache for compute time benchmarks since these results
+  // should be specific to the user's local machine performance
   const { result: resultsPyodide } = usePyodideResult(pythonCode, {
     readCache,
     writeCache: true,
+    skipMemobin: true,
   });
 
   const [resultsWasmlets, setResultsWasmlets] = useState<any | null>(null);

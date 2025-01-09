@@ -157,7 +157,15 @@ const Markdown: FunctionComponent<Props> = ({
       },
       // }
     }),
-    [onSpecialLinkClick, onRunCode, runCodeReady, files, divHandler, codeHandler, onRelativeLinkClick]
+    [
+      onSpecialLinkClick,
+      onRunCode,
+      runCodeReady,
+      files,
+      divHandler,
+      codeHandler,
+      onRelativeLinkClick,
+    ],
   );
   return (
     <div className="markdown-body" style={{ fontSize: 16 }}>

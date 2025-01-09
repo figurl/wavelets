@@ -2,6 +2,7 @@ import { useWindowDimensions } from "@fi-sci/misc";
 import "./App.css";
 
 import { FunctionComponent } from "react";
+import { MemobinProvider, MemobinStatusIndicator } from "./internal/Memobin";
 import { BrowserRouter } from "react-router-dom";
 import { useRoute } from "./Route";
 import RouteProvider from "./RouteProvider";
@@ -11,12 +12,15 @@ import TestPage from "./pages/TestPage/TestPage";
 function App() {
   const { width, height } = useWindowDimensions();
   return (
-    <BrowserRouter>
-      <RouteProvider>
-        {/* <MainWindow width={width} height={height} /> */}
-        <Main width={width} height={height} />
-      </RouteProvider>
-    </BrowserRouter>
+    <MemobinProvider>
+      <BrowserRouter>
+        <RouteProvider>
+          {/* <MainWindow width={width} height={height} /> */}
+          <Main width={width} height={height} />
+        </RouteProvider>
+      </BrowserRouter>
+      <MemobinStatusIndicator />
+    </MemobinProvider>
   );
 }
 

@@ -1,4 +1,10 @@
-import { FunctionComponent, PropsWithChildren, useMemo, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 import { useInView } from "react-intersection-observer";
 
@@ -34,18 +40,21 @@ const PlotFromCode: FunctionComponent<PlotFromCodeProps> = ({
   codeElement,
 }) => {
   const hasBeenVisible = useRef(false);
+  const [useCache, setUseCache] = useState(true);
+  const [recomputeCounter, setRecomputeCounter] = useState(0);
   const { ref, inView } = useInView({ trackVisibility: true, delay: 200 });
   const code2 = useMemo(() => {
     const preamble = `
 import sys
 sys.path.append('/working')
+# Force recompute counter: ${recomputeCounter}
 `;
     return preamble + code;
-  }, [code]);
+  }, [code, recomputeCounter]);
   const { images, status } = usePyodideResult(
     inView || hasBeenVisible.current ? code2 : null,
     {
-      readCache: true,
+      readCache: useCache,
       writeCache: true,
       additionalFiles,
     },
@@ -55,7 +64,14 @@ sys.path.append('/working')
     <div ref={ref}>
       {inView || hasBeenVisible ? (
         <>
-          <ExpandableCode codeElement={codeElement} />
+          <ExpandableCode
+            codeElement={codeElement}
+            onRecompute={() => {
+              setUseCache(false);
+              setRecomputeCounter((c) => c + 1);
+            }}
+            hasResult={!!images}
+          />
           {!images ? (
             status === undefined ? (
               <div>Waiting for plot...</div>
@@ -83,28 +99,65 @@ sys.path.append('/working')
   );
 };
 
-const ImagesDiv: FunctionComponent<PropsWithChildren> = ({
-  children
-}) => {
+const ImagesDiv: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const style: React.CSSProperties = {
     display: "flex",
     flexWrap: "wrap",
     gap: "1em",
-    justifyContent: "flex-start"
+    justifyContent: "flex-start",
   };
-  return <div style={style}>{children}</div>;
-}
+  const childArray = React.Children.toArray(children);
+  const showLabels = childArray.length > 1;
 
-const ExpandableCode: FunctionComponent<{ codeElement: JSX.Element }> = ({
-  codeElement,
-}) => {
+  return (
+    <div style={style}>
+      {childArray.map((child, index) => (
+        <div key={index} style={{ position: "relative" }}>
+          {showLabels && (
+            <div
+              style={{
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                background: "white",
+                padding: "2px 6px",
+                borderRadius: "3px",
+                fontWeight: "bold",
+                fontSize: "14px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              }}
+            >
+              {String.fromCharCode(65 + index)}
+            </div>
+          )}
+          {child}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ExpandableCode: FunctionComponent<{
+  codeElement: JSX.Element;
+  onRecompute: () => void;
+  hasResult: boolean;
+}> = ({ codeElement, onRecompute, hasResult }) => {
   const [expanded, setExpanded] = useState(false);
   return (
     <div>
       <button onClick={() => setExpanded(!expanded)}>
         {expanded ? "Hide code" : "Show code"}
       </button>
-      {expanded && codeElement}
+      {expanded && (
+        <>
+          {hasResult && (
+            <button onClick={onRecompute} style={{ marginLeft: 10 }}>
+              Recompute
+            </button>
+          )}
+          {codeElement}
+        </>
+      )}
     </div>
   );
 };
