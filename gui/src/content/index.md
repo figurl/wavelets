@@ -59,7 +59,7 @@ $$
 
 is the probability of the sample having a value at step $j$. The entropy of the signal, or the theoretical required storage size in bits, is then $H = NH_0$ and the theoretical compression ratio is $16 / H_0$, assuming that the original signal is stored as 16-bit integers.
 
-The following plots compare the performance of our three compression methods (QTC, QFC, and QWC) on a Gaussian signal, showing how compression ratio varies with error rate.
+The following plots compare the performance of our three compression methods (QTC, QFC, and QWC) on a Gaussian signal, showing how compression ratio varies with error rate. The striking feature of Figure 1A is that all three methods (QTC, QFC, QWC) have exactly the same compression performance. This is as expected because the Gaussian i.i.d. signal has no structure that can be exploited by either the Fourier or wavelet transforms -- it is expected to be equally random in any of these domains. The theoretical limit is also shown for reference, which is consistently above the actual compression ratios. This is due to that fact that the available lossless methods are suboptimal for data that are randomly sampled in this simplistic manner, as they are designed to work with highly structured data such as text or images. The ideal compression method in this case would be pure arithmetic coding, which is very difficult implement efficiently in practice.
 
 ```python
 # generate-plot
@@ -74,9 +74,49 @@ show_compression_method_comparison("gaussian", use_filter=True)
 </figcaption>
 </figure>
 
-In this case, the actual compression ratios are significantly lower than the theoretical limit. This is due to that fact that the available lossless methods are suboptimal when the data are random, as they are designed to work with recurring patterns in the data, such as is the case for images and text. The ideal method would be arithmetic coding, which is unfortunately very difficult to implement efficiently in practice.
+**Compression of Real Electrophysiology Data**
 
-For an analysis of how these compression methods perform on real electrophysiology data, see our [real data analysis](real_data_analysis).
+Let's examine how our compression methods perform on real electrophysiology data from a [publicly available dataset](https://neurosift.app/?p=/nwb&url=https://api.dandiarchive.org/api/assets/c04f6b30-82bf-40e1-9210-34f0bcd8be24/download/&dandisetId=000409&dandisetVersion=draft).
+
+Here's a sample of the signal we're analyzing:
+
+```python
+# generate-plot
+import numpy as np
+import requests
+import io
+
+def load_real_1(*, num_samples: int, num_channels: int, start_channel: int) -> np.ndarray:
+    url = f'https://lindi.neurosift.org/tmp/ephys-compression/real_1_{num_samples}_{start_channel}_{num_channels}.npy'
+    response = requests.get(url)
+    response.raise_for_status()
+    return np.load(io.BytesIO(response.content))
+
+signal = load_real_1(num_samples=5000, num_channels=1, start_channel=101)
+
+import matplotlib.pyplot as plt
+timestamps = np.arange(len(signal)) / 30000
+plt.figure(figsize=(10, 5))
+plt.plot(timestamps, signal)
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.title('Sample Ephys Signal')
+plt.show()
+```
+
+Let's examine how different compression methods perform:
+
+```python
+# generate-plot
+from scripts.compression_ratio_vs_nrmse import show_compression_method_comparison
+show_compression_method_comparison("real", use_filter=False)
+show_compression_method_comparison("real", use_filter=True)
+```
+<figure>
+<figcaption>
+<strong>Figure 2:</strong> Compression performance comparison on real electrophysiology data. (A) Without filtering, the Fourier (QFC) and wavelet (QWC) methods perform similarly to the time domain (QTC) method until the NRMSE reaches a certain threshold. Then QFC and QWC begin to substantially outperform QTC. (B) As expected, bandpass filtering significantly improves compression performance, especially for QFC and QWC.
+</figcaption>
+</figure>
 
 ---
 
