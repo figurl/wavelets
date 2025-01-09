@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo, useRef, useState } from "react";
+import { FunctionComponent, PropsWithChildren, useMemo, useRef, useState } from "react";
 import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 import { useInView } from "react-intersection-observer";
 
@@ -26,7 +26,7 @@ type PlotFromCodeProps = {
 
 const additionalFiles: { [key: string]: string } = {};
 for (const [path, content] of Object.entries(scriptContents)) {
-  additionalFiles['/working/' + path] = content;
+  additionalFiles["/working/" + path] = content;
 }
 
 const PlotFromCode: FunctionComponent<PlotFromCodeProps> = ({
@@ -47,8 +47,8 @@ sys.path.append('/working')
     {
       readCache: true,
       writeCache: true,
-      additionalFiles
-    }
+      additionalFiles,
+    },
   );
   if (inView) hasBeenVisible.current = true;
   return (
@@ -69,9 +69,11 @@ sys.path.append('/working')
               <div>{status}</div>
             )
           ) : (
-            images.map((img, i) => (
-              <img key={i} src={"data:image/png;base64," + img} alt="plot" />
-            ))
+            <ImagesDiv>
+              {images.map((img, i) => (
+                <img key={i} src={"data:image/png;base64," + img} alt="plot" />
+              ))}
+            </ImagesDiv>
           )}
         </>
       ) : (
@@ -80,6 +82,18 @@ sys.path.append('/working')
     </div>
   );
 };
+
+const ImagesDiv: FunctionComponent<PropsWithChildren> = ({
+  children
+}) => {
+  const style: React.CSSProperties = {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "1em",
+    justifyContent: "flex-start"
+  };
+  return <div style={style}>{children}</div>;
+}
 
 const ExpandableCode: FunctionComponent<{ codeElement: JSX.Element }> = ({
   codeElement,

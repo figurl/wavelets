@@ -72,13 +72,21 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
   const source = contents[d];
 
   // Get content without the title line for rendering
-  const contentWithoutTitle = useMemo(() => {
+  const contentFiltered = useMemo(() => {
+
+    // if we want to remove te title
     // const lines = source?.split('\n') || [];
     // if (lines.length > 0 && lines[0].trim().startsWith('#')) {
     //   return lines.slice(1).join('\n').trim();
     // }
-    return source || "";
-  }, [source]);
+
+    let content = source || "";
+    if (d.endsWith(".py")) {
+      content = "```python\n" + content + "\n```";
+    }
+
+    return content;
+  }, [source, d]);
 
   const handleRelativeLinkClick = useCallback(
     (link: string) => {
@@ -108,9 +116,9 @@ const ContentPage: FunctionComponent<ContentPageProps> = ({
             currentPath={d}
             onFileClick={(path) => setRoute({ type: "content", d: path })}
           />
-          <MarkdownWrapper width={0} height={0}>
+          <MarkdownWrapper width={0} height={0} source={contentFiltered}>
             <Markdown
-              source={contentWithoutTitle}
+              source={contentFiltered}
               onRelativeLinkClick={handleRelativeLinkClick}
               divHandler={divHandler}
               codeHandler={codeHandler}

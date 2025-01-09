@@ -63,13 +63,18 @@ Figure 1 shows a plot of the theoretical compression ratio for a Gaussian signal
 
 ```python
 # generate-plot
-from scripts.qtc_compression_ratio_for_gaussian import show_plot
-show_plot()
+from scripts.compression_ratio_vs_nrmse import show_compression_method_comparison
+show_compression_method_comparison("gaussian", use_filter=False, show_theoretical_for_reference=True)
+show_compression_method_comparison("gaussian", use_filter=True)
+show_compression_method_comparison("real", use_filter=False)
+show_compression_method_comparison("real", use_filter=True)
 ```
 
 In this case, the actual compression ratios are significantly lower than the theoretical limit. This is due to that fact that the available lossless methods are suboptimal when the data are random, as they are designed to work with recurring patterns in the data, such as is the case for images and text. The ideal method would be arithmetic coding, which is unfortunately very difficult to implement efficiently in practice.
 
-Now let's consider some [real electrophysiology data](https://neurosift.app/?p=/nwb&url=https://api.dandiarchive.org/api/assets/c04f6b30-82bf-40e1-9210-34f0bcd8be24/download/&dandisetId=000409&dandisetVersion=draft):
+Now let's consider some [real electrophysiology data](https://neurosift.app/?p=/nwb&url=https://api.dandiarchive.org/api/assets/c04f6b30-82bf-40e1-9210-34f0bcd8be24/download/&dandisetId=000409&dandisetVersion=draft).
+
+Here's the signal we're working with:
 
 ```python
 # generate-plot
@@ -94,111 +99,6 @@ plt.ylabel('Amplitude')
 plt.title('Sample Ephys Signal')
 plt.show()
 ```
-
-Here's the QTC compression ratio vs. NRMSE plot for the real data:
-
-```python
-# generate-plot
-import numpy as np
-import requests
-import io
-from scipy.special import erf
-
-def p_function(i, q, sigma):
-    return 0.5 * (erf((i + 0.5) * q / (2**0.5 * sigma)) - erf((i - 0.5) * q / (2**0.5 * sigma)))
-
-def entropy_per_sample(q, sigma):
-    v = round(sigma / q * 20)
-    return -sum(p_function(i, q, sigma) * np.log2(p_function(i, q, sigma)) for i in range(-v, v + 1) if p_function(i, q, sigma) > 0)
-
-def theoretical_compression_ratio(q, sigma):
-    return 16 / entropy_per_sample(q, sigma)
-
-def nrmse(*, signal, q, noise_level):
-    xhat = np.round(signal / q) * q
-    return np.sqrt(np.sum((signal - xhat)**2) / len(signal) / noise_level**2)
-
-def get_compression_ratio(*, signal, q, lossless_method='zlib'):
-    quantized_signal_ints = np.round(signal / q).astype(np.int32)
-    buf = quantized_signal_ints.tobytes()
-
-    if lossless_method == 'zlib':
-        import zlib
-        compressed = zlib.compress(buf, level=9)
-    elif lossless_method == 'zstandard':
-        import zstandard
-        cctx = zstandard.ZstdCompressor(level=22)
-        compressed = cctx.compress(buf)
-    elif lossless_method == 'lzma':
-        import lzma
-        compressed = lzma.compress(buf, preset=9)
-    else:
-        raise ValueError('Invalid lossless method')
-    return len(signal) * 2 / len(compressed)
-
-def estimate_noise_level(array: np.ndarray, *, sampling_frequency: float) -> float:
-    array_filtered = highpass_filter(array, sampling_frequency=sampling_frequency, lowcut=300)
-    MAD = float(np.median(np.abs(array_filtered.ravel() - np.median(array_filtered.ravel()))) / 0.6745)
-    return MAD
-
-def lowpass_filter(array, *, sampling_frequency, highcut) -> np.ndarray:
-    from scipy.signal import butter, lfilter
-
-    nyquist = 0.5 * sampling_frequency
-    high = highcut / nyquist
-    b, a = butter(5, high, btype="low")
-    return lfilter(b, a, array, axis=0)  # type: ignore
-
-
-def highpass_filter(array, *, sampling_frequency, lowcut) -> np.ndarray:
-    from scipy.signal import butter, lfilter
-
-    nyquist = 0.5 * sampling_frequency
-    low = lowcut / nyquist
-    b, a = butter(5, low, btype="high")
-    return lfilter(b, a, array, axis=0)  # type: ignore
-
-
-def bandpass_filter(array, *, sampling_frequency, lowcut, highcut) -> np.ndarray:
-    from scipy.signal import butter, lfilter
-
-    nyquist = 0.5 * sampling_frequency
-    low = lowcut / nyquist
-    high = highcut / nyquist
-    b, a = butter(5, [low, high], btype="band")
-    return lfilter(b, a, array, axis=0)  # type: ignore
-
-def load_real_1(*, num_samples: int, num_channels: int, start_channel: int) -> np.ndarray:
-    url = f'https://lindi.neurosift.org/tmp/ephys-compression/real_1_{num_samples}_{start_channel}_{num_channels}.npy'
-    response = requests.get(url)
-    response.raise_for_status()
-    return np.load(io.BytesIO(response.content))
-
-signal = load_real_1(num_samples=1000, num_channels=1, start_channel=101)
-signal = (signal.ravel() - np.median(signal.ravel())).astype(np.int16)
-
-qs = np.arange(0.1, 40, 0.1)
-estimated_noise_level = estimate_noise_level(signal, sampling_frequency=30000)
-actual_compression_ratios_zlib = [get_compression_ratio(signal=signal, q=q, lossless_method='zlib') for q in qs]
-actual_compression_ratios_zstandard = [get_compression_ratio(signal=signal, q=q, lossless_method='zstandard') for q in qs]
-actual_compression_ratios_lzma = [get_compression_ratio(signal=signal, q=q, lossless_method='lzma') for q in qs]
-nrmses = [nrmse(signal=signal, q=q, noise_level=estimated_noise_level) for q in qs]
-
-import matplotlib.pyplot as plt
-plt.figure()
-plt.plot(nrmses, actual_compression_ratios_zlib, label='Zlib')
-plt.plot(nrmses, actual_compression_ratios_zstandard, label='Zstandard')
-plt.plot(nrmses, actual_compression_ratios_lzma, label='LZMA')
-plt.xlabel('NRMSE')
-plt.ylabel('Compression Ratio')
-plt.legend()
-plt.semilogy()
-plt.grid(True, which='both', axis='y', linestyle='--')
-plt.title('QTC Compression Ratio vs. NRMSE for Real Ephys Example')
-plt.show()
-```
-
-Here's the signal we're working with:
 
 ---
 
