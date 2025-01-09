@@ -55,30 +55,20 @@ const DivCompressionPlot: FunctionComponent<DivCompressionPlotProps> = (
 
   return (
     <>
-      {result.compressed.map(
-        (
-          {
-            nrmse,
-            compressed,
-            compression_ratio,
-            theoretical_compression_ratio,
-          },
-          i,
-        ) => (
-          <CompressionPlot
-            key={i}
-            title={`Wavelet: ${waveletName}; NRMSE: ${
-              Math.round(nrmse * 100) / 100
-            }; Compression ratio: ${compression_ratio.toFixed(2)}; Theoretical compression ratio: ${theoretical_compression_ratio.toFixed(2)}`}
-            samplingFrequency={result.sampling_frequency}
-            original={result.original.slice(0, numSamples)}
-            compressed={compressed.slice(0, numSamples)}
-            width={width - 30} // leave room for scrollbar
-            height={400}
-            mode={plotMode}
-          />
-        ),
-      )}
+      {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
+        <CompressionPlot
+          key={i}
+          title={`Wavelet: ${waveletName}; NRMSE: ${
+            Math.round(nrmse * 100) / 100
+          }; Compression ratio: ${compression_ratio.toFixed(2)}`}
+          samplingFrequency={result.sampling_frequency}
+          original={result.original.slice(0, numSamples)}
+          compressed={compressed.slice(0, numSamples)}
+          width={width - 30} // leave room for scrollbar
+          height={400}
+          mode={plotMode}
+        />
+      ))}
     </>
   );
 };

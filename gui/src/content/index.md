@@ -11,7 +11,7 @@ In this site, we explore and analyze three methods for lossy compression of time
 All three methods involve the following steps for compression:
 
 - Transform the time series data to a different domain (or keep them in the time domain for QTC)
-- Quantize the transformed data in order to lower the information energy (this is where the loss occurs)
+- Quantize the transformed data in order to lower the information entropy (this is where the loss occurs)
 - Compress the quantized data using a lossless method such as zlib
 
 Then to reconstruct an approximation of the original signal, the following steps are taken:
@@ -112,11 +112,42 @@ from scripts.compression_ratio_vs_nrmse import show_compression_method_compariso
 show_compression_method_comparison("real", use_filter=False)
 show_compression_method_comparison("real", use_filter=True)
 ```
+
 <figure>
 <figcaption>
 <strong>Figure 2:</strong> Compression performance comparison on real electrophysiology data. (A) Without filtering, the Fourier (QFC) and wavelet (QWC) methods perform similarly to the time domain (QTC) method until the NRMSE reaches a certain threshold. Then QFC and QWC begin to substantially outperform QTC. (B) As expected, bandpass filtering significantly improves compression performance, especially for QFC and QWC.
 </figcaption>
 </figure>
+
+**Visualizing the Compressed Signals**
+
+Let's take a closer look at the compressed signals to get some insight into the errors that are being introduced at various compression levels.
+
+<figure>
+<div class="DivCompressionPlot" wavelet_name="time-domain" num_samples="1024" signal_type="gaussian_noise" nrmses="0.3"></div>
+<figcaption>
+<strong>Figure 3:</strong> A Gaussian signal compressed using QTC.</figcaption>
+</figure>
+
+<figure>
+<div class="DivCompressionPlot" wavelet_name="fourier" num_samples="1024" signal_type="gaussian_noise" nrmses="0.3"></div>
+<figcaption>
+<strong>Figure 4:</strong> A Gaussian signal compressed using QFC.</figcaption>
+</figure>
+
+<figure>
+<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="gaussian_noise" nrmses="0.3"></div>
+<figcaption>
+<strong>Figure 5:</strong> A Gaussian signal compressed using QWC with db4 wavelets.</figcaption>
+</figure>
+
+<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.3"></div>
+
+<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6"></div>
+
+<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6" filt_lowcut="300" filt_highcut="6000"></div>
+
+<div class="DivCompressionPlot" wavelet_name="fourier" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6" transform="fourier" filt_lowcut="300" filt_highcut="6000"></div>
 
 ---
 

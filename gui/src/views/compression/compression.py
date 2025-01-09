@@ -46,13 +46,13 @@ def test_compression(*,
     else:
         pass
     original_size = original.nbytes
-    if wavelet_name != 'fourier':
-        coeffs = pywt.wavedec(original, wavelet_name, mode=wavelet_extension_mode)
-    elif wavelet_name == 'fourier':
+    if wavelet_name == 'fourier':
         original_fft = np.fft.rfft(original.astype(float))
         coeffs = [np.real(original_fft), np.imag(original_fft)]
+    elif wavelet_name == "time-domain":
+        coeffs = [original]
     else:
-        raise ValueError(f'Unknown wavelet name: {wavelet_name}')
+        coeffs = pywt.wavedec(original, wavelet_name, mode=wavelet_extension_mode)
 
     estimated_noise_level = estimate_noise_level(original, sampling_frequency=sampling_frequency)
 
@@ -72,12 +72,12 @@ def test_compression(*,
             ascending=True,
         )
         coeffs_quantized = [quantize(c / quant_scale_factor) for c in coeffs]
-        if wavelet_name != 'fourier':
-            compressed = pywt.waverec(coeffs_quantized, wavelet_name, mode=wavelet_extension_mode) * quant_scale_factor
-        elif wavelet_name == 'fourier':
+        if wavelet_name == 'fourier':
             compressed = np.fft.irfft(coeffs_quantized[0] + 1j * coeffs_quantized[1]) * quant_scale_factor
+        elif wavelet_name == 'time-domain':
+            compressed = coeffs_quantized[0] * quant_scale_factor
         else:
-            raise ValueError(f'Unknown wavelet name: {wavelet_name}')
+            compressed = pywt.waverec(coeffs_quantized, wavelet_name, mode=wavelet_extension_mode) * quant_scale_factor
         if lossless_compression_method == 'zlib':
             compressed_size = len(zlib_compress(np.concatenate(coeffs_quantized).tobytes()))
         elif lossless_compression_method == 'zstd':
@@ -147,12 +147,12 @@ def get_nrmse_for_quant_scale_factor(*,
     estimated_noise_level: float
 ):
     coeffs_quantized = [quantize(c / quant_scale_factor) for c in coeffs]
-    if wavelet_name != 'fourier':
-        compressed = pywt.waverec(coeffs_quantized, wavelet_name, mode=wavelet_extension_mode) * quant_scale_factor
-    elif wavelet_name == 'fourier':
+    if wavelet_name == 'fourier':
         compressed = np.fft.irfft(coeffs_quantized[0] + 1j * coeffs_quantized[1]) * quant_scale_factor
+    elif wavelet_name == 'time-domain':
+        compressed = coeffs_quantized[0] * quant_scale_factor
     else:
-        raise ValueError(f'Unknown wavelet name: {wavelet_name}')
+        compressed = pywt.waverec(coeffs_quantized, wavelet_name, mode=wavelet_extension_mode) * quant_scale_factor
     nrmse = compute_nrmse(original, compressed, estimated_noise_level)
     return nrmse
 

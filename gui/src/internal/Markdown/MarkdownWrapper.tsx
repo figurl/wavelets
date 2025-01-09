@@ -21,7 +21,9 @@ const MarkdownWrapper: FunctionComponent<
   }, [source]);
 
   return (
-    <ProvideDocumentWidth width={width}>
+    // The figures are offset from the left, so we need to give some room
+    // TODO: figure out how to do this better
+    <ProvideDocumentWidth width={width - 50}>
       <div
         ref={scrollableRef}
         className="MarkdownWrapper"
