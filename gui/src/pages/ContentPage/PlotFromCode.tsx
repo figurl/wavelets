@@ -1,11 +1,33 @@
-import { FunctionComponent, useRef, useState } from "react";
+import { FunctionComponent, useMemo, useRef, useState } from "react";
 import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
 import { useInView } from "react-intersection-observer";
+
+const pyModules = import.meta.glob<{ default: string }>(
+  "../../content/**/*.py",
+  {
+    query: "?raw",
+    eager: true,
+  },
+);
+
+// Create contents mapping by transforming the paths
+const scriptContents: { [key: string]: string } = Object.fromEntries(
+  Object.entries(pyModules).map(([path, content]) => [
+    // Transform './content/folder1/test2.py' to 'folder1/test2.py'
+    path.replace(/^\.\.\/\.\.\/content\//, ""),
+    content.default,
+  ]),
+);
 
 type PlotFromCodeProps = {
   code: string;
   codeElement: JSX.Element;
 };
+
+const additionalFiles: { [key: string]: string } = {};
+for (const [path, content] of Object.entries(scriptContents)) {
+  additionalFiles['/working/' + path] = content;
+}
 
 const PlotFromCode: FunctionComponent<PlotFromCodeProps> = ({
   code,
@@ -13,8 +35,20 @@ const PlotFromCode: FunctionComponent<PlotFromCodeProps> = ({
 }) => {
   const hasBeenVisible = useRef(false);
   const { ref, inView } = useInView({ trackVisibility: true, delay: 200 });
+  const code2 = useMemo(() => {
+    const preamble = `
+import sys
+sys.path.append('/working')
+`;
+    return preamble + code;
+  }, [code]);
   const { images, status } = usePyodideResult(
-    inView || hasBeenVisible.current ? code : null,
+    inView || hasBeenVisible.current ? code2 : null,
+    {
+      readCache: true,
+      writeCache: true,
+      additionalFiles
+    }
   );
   if (inView) hasBeenVisible.current = true;
   return (

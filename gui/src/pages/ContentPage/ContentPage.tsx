@@ -17,6 +17,14 @@ const mdModules = import.meta.glob<{ default: string }>(
   },
 );
 
+const pyModules = import.meta.glob<{ default: string }>(
+  "../../content/**/*.py",
+  {
+    query: "?raw",
+    eager: true,
+  },
+);
+
 // Create contents mapping by transforming the paths
 const contents: { [key: string]: string } = Object.fromEntries(
   Object.entries(mdModules).map(([path, content]) => [
@@ -25,6 +33,12 @@ const contents: { [key: string]: string } = Object.fromEntries(
     content.default,
   ]),
 );
+
+// Add all python files to contents mapping
+Object.entries(pyModules).forEach(([path, content]) => {
+  // Transform './content/folder1/test2.py' to 'folder1/test2.py'
+  contents[path.replace(/^\.\.\/\.\.\/content\//, "")] = content.default;
+});
 
 const resolvePath = (currentPath: string, relativePath: string) => {
   // relativePath is like ./foo or ../foo/bar

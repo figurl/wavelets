@@ -55,7 +55,7 @@ const loadPyodideInstance = async () => {
         stderr: (x: string) => {
           sendStderr(x);
         },
-        packages: ["numpy", "requests", "h5py", "micropip", "PyWavelets"],
+        packages: ["numpy", "requests", "h5py", "micropip", "PyWavelets", "zstandard", "lzma"],
       });
     } finally {
       // Restore original fetch
@@ -145,18 +145,32 @@ const run = async (
       setStatus("running");
       // Write any additional Python files to the filesystem
       if (additionalFiles) {
-        for (const [filename, content] of Object.entries(additionalFiles)) {
-          if (typeof content === "string") {
-            pyodide.FS.writeFile(filename, content);
-          } else {
-            const b64 = content.base64;
-            const binary = atob(b64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-              bytes[i] = binary.charCodeAt(i);
+        try {
+          const dirsCreated = new Set<string>();
+          for (const [filename, content] of Object.entries(additionalFiles)) {
+            // make sure directory exists
+            if (filename.includes("/")) {
+              const dirname = filename.split("/").slice(0, -1).join("/");
+              if (!dirsCreated.has(dirname)) {
+                pyodide.FS.mkdirTree(dirname);
+              }
+              dirsCreated.add(dirname);
             }
-            pyodide.FS.writeFile(filename, bytes);
+            if (typeof content === "string") {
+              pyodide.FS.writeFile(filename, content);
+            } else {
+              const b64 = content.base64;
+              const binary = atob(b64);
+              const bytes = new Uint8Array(binary.length);
+              for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+              }
+              pyodide.FS.writeFile(filename, bytes);
+            }
           }
+        } catch (e) {
+          console.error('Error writing additional files');
+          throw e;
         }
       }
 
