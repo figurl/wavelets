@@ -6,8 +6,28 @@ import {
 } from "./pyodideWorkerTypes";
 // import spDrawsScript from "./sp_load_draws.py?raw";
 import spMPLScript from "./sp_patch_matplotlib.py?raw";
+import call_async_js_py from "./call_async_js.py?raw";
 
 let pyodide: PyodideInterface | null = null;
+const asyncFunctions = new Map<string, string>(); // Maps function IDs to names
+const asyncFunctionPromises = new Map<
+  string,
+  { resolve: (value: any) => void; reject: (error: any) => void }
+>();
+
+// Function to call async functions from Python
+const callAsyncFunction = async (name: string, ...args: any[]) => {
+  const id = Math.random().toString(36).substring(2);
+  return new Promise((resolve, reject) => {
+    asyncFunctionPromises.set(id, { resolve, reject });
+    sendMessageToMain({
+      type: "callAsyncFunction",
+      id,
+      name,
+      args,
+    });
+  });
+};
 
 // Custom fetch with caching
 const fetchWithCache = async (originalFetch: any, url: string) => {
@@ -71,12 +91,24 @@ const loadPyodideInstance = async () => {
     }
     setStatus("installing");
 
+    pyodide.FS.mkdirTree("/internal_modules");
     // pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript, {
     //   encoding: "utf-8",
     // });
-    pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript, {
-      // encoding: "utf-8",
-    });
+    pyodide.FS.writeFile(
+      "/internal_modules/sp_patch_matplotlib.py",
+      spMPLScript,
+      {
+        // encoding: "utf-8",
+      },
+    );
+    pyodide.FS.writeFile(
+      "/internal_modules/call_async_js.py",
+      call_async_js_py,
+      {
+        // encoding: "utf-8",
+      },
+    );
 
     console.info(`Pyodide loaded in ${(Date.now() - timer) / 1000} seconds`);
 
@@ -114,12 +146,22 @@ const addImage = (image: any) => {
 };
 
 self.onmessage = async (e) => {
-  // if (isMonacoWorkerNoise(e.data)) {
-  //   return;
-  // }
   const message = e.data;
-  if (message.code) {
+
+  if (message.type === "run") {
     await run(message.code, message.additionalFiles);
+  } else if (message.type === "registerAsyncFunction") {
+    asyncFunctions.set(message.id, message.name);
+  } else if (message.type === "asyncFunctionResult") {
+    const promise = asyncFunctionPromises.get(message.id);
+    if (promise) {
+      asyncFunctionPromises.delete(message.id);
+      if (message.error) {
+        promise.reject(new Error(message.error));
+      } else {
+        promise.resolve(message.result);
+      }
+    }
   }
 };
 
@@ -183,17 +225,29 @@ const run = async (
       }
 
       const scriptPreamble = `
+import sys
+sys.path.append('/internal_modules')
+
 from sp_patch_matplotlib import patch_matplotlib
 patch_matplotlib(_SP_ADD_IMAGE)
+
+from call_async_js import _set_sp_call_async_function
+_set_sp_call_async_function(_SP_CALL_ASYNC_FUNCTION)
 `;
-      const globalsJS: { [key: string]: any } = {};
-      globalsJS._SP_ADD_IMAGE = addImage;
-      const globals = pyodide.toPy(globalsJS);
+      const globalsJS: { [key: string]: any } = {
+        _SP_ADD_IMAGE: addImage,
+        _SP_CALL_ASYNC_FUNCTION: callAsyncFunction,
+      };
+      const pyGlobals = pyodide.toPy(globalsJS);
 
-      const script2 = scriptPreamble + "\n" + script;
+      // First run the script preamble to set up the environment
+      await pyodide.runPythonAsync(scriptPreamble, {
+        globals: pyGlobals,
+      });
 
-      let result = await pyodide.runPythonAsync(script2, {
-        globals,
+      // Then run the actual script
+      let result = await pyodide.runPythonAsync(script, {
+        globals: pyGlobals,
         filename: "_script.py",
       });
       succeeded = true;

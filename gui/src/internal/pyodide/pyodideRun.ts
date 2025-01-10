@@ -20,6 +20,7 @@ type PyodideCallbacks = {
   onStderr: (data: string) => void;
   onStatus: (status: InterpreterStatus) => void;
   onImage?: (image: any) => void;
+  asyncFunctions?: { [name: string]: (...args: any[]) => Promise<any> };
 };
 
 /**
@@ -51,6 +52,41 @@ class PyodideWorkerManager {
    */
   private constructor() {
     this.worker = this.initializeWorker();
+    this.registerAsyncFunctions = this.registerAsyncFunctions.bind(this);
+  }
+
+  private registerAsyncFunctions(functions: {
+    [name: string]: (...args: any[]) => Promise<any>;
+  }) {
+    for (const [name, func] of Object.entries(functions)) {
+      const id = Math.random().toString(36).substring(2);
+      this.worker.postMessage({
+        type: "registerAsyncFunction",
+        name,
+        id,
+      });
+      // Set up listener for this function's calls
+      this.worker.addEventListener("message", async (e) => {
+        const msg = e.data;
+        if (msg.type === "callAsyncFunction" && msg.name === name) {
+          try {
+            const result = await func(...msg.args);
+            this.worker.postMessage({
+              type: "asyncFunctionResult",
+              id: msg.id,
+              result,
+            });
+          } catch (error) {
+            this.worker.postMessage({
+              type: "asyncFunctionResult",
+              id: msg.id,
+              result: null,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+      });
+    }
   }
 
   /**
@@ -128,6 +164,11 @@ class PyodideWorkerManager {
     this.isRunning = true;
     this.currentCallbacks = nextTask.callbacks;
     this.currentResult = undefined;
+
+    // Register any provided async functions
+    if (nextTask.callbacks.asyncFunctions) {
+      this.registerAsyncFunctions(nextTask.callbacks.asyncFunctions);
+    }
 
     const msg: MessageToPyodideWorker = {
       type: "run",
