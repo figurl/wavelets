@@ -3,6 +3,7 @@
 
 export type WaveletName =
   | "fourier"
+  | "time-domain"
   | "bior1.1"
   | "bior1.3"
   | "bior1.5"
@@ -87,6 +88,7 @@ export type WaveletName =
   | "rbio3.5";
 export const waveletNameChoices = [
   "fourier",
+  "time-domain",
   "bior1.1",
   "bior1.3",
   "bior1.5",

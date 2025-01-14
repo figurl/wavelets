@@ -5,9 +5,9 @@ import { RemoteH5File } from "../../internal/remote-h5-file";
 import { removeMainSectionFromPy } from "../../internal/utils/removeMainSectionFromPy";
 import compression_py from "./compression.py?raw";
 import {
-  CompressionPlotMode,
-  CompressionPlotModeSelector,
+  CompressionMethod,
   FilterSelector,
+  MethodSelector,
   NumSamplesSelector,
   SignalType,
   SignalTypeSelector,
@@ -15,6 +15,7 @@ import {
 } from "./selectors";
 import { Filter, WaveletName } from "../../common";
 import { usePyodideResult } from "../../internal/pyodide/usePyodideResult";
+import CompressionPlotlyPlot from "./CompressionPlotlyPlot";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type DivExploreCompressionProps = {
@@ -88,11 +89,24 @@ const nrmses = [0.1, 0.2, 0.4, 0.6, 0.8];
 const DivExploreCompression: FunctionComponent<
   DivExploreCompressionProps
 > = () => {
-  const [waveletName, setWaveletName] = useState<WaveletName>("db4");
+  const [method, setMethod] = useState<CompressionMethod>("QWC");
+  const [selectedWaveletName, setSelectedWaveletName] =
+    useState<WaveletName>("db4");
+
+  // Determine effective wavelet name based on method
+  const waveletName = useMemo(() => {
+    switch (method) {
+      case "QWC":
+        return selectedWaveletName;
+      case "QFC":
+        return "fourier";
+      case "QTC":
+        return "time-domain";
+    }
+  }, [method, selectedWaveletName]);
   const [numSamples, setNumSamples] = useState(1024);
   const [filter, setFilter] = useState<Filter>("none");
   const [signalType, setSignalType] = useState<SignalType>("gaussian_noise");
-  const [plotMode, setPlotMode] = useState<CompressionPlotMode>("default");
   const { filtLowcut, filtHighcut } = parseFilter(filter);
   const width = useDocumentWidth();
 
@@ -121,11 +135,15 @@ const DivExploreCompression: FunctionComponent<
           setSignalType={setSignalType}
         />
         &nbsp;&nbsp;
-        <WaveletNameSelector
-          waveletName={waveletName}
-          setWaveletName={setWaveletName}
-          includeFourier={true}
-        />
+        <MethodSelector method={method} setMethod={setMethod} />
+        &nbsp;&nbsp;
+        {method === "QWC" && (
+          <WaveletNameSelector
+            waveletName={selectedWaveletName}
+            setWaveletName={setSelectedWaveletName}
+            includeFourier={false}
+          />
+        )}
         &nbsp;&nbsp;
         <NumSamplesSelector
           numSamples={numSamples}
@@ -133,8 +151,6 @@ const DivExploreCompression: FunctionComponent<
         />
         &nbsp;&nbsp;
         <FilterSelector filter={filter} setFilter={setFilter} />
-        &nbsp;&nbsp;
-        <CompressionPlotModeSelector mode={plotMode} setMode={setPlotMode} />
       </div>
       <hr />
       <CompressionRatioVsNRMSEPlot
@@ -146,7 +162,7 @@ const DivExploreCompression: FunctionComponent<
         height={300}
       />
       {result.compressed.map(({ nrmse, compressed, compression_ratio }, i) => (
-        <CompressionPlot
+        <CompressionPlotlyPlot
           key={i}
           title={`NRMSE: ${
             Math.round(nrmse * 100) / 100
@@ -156,7 +172,6 @@ const DivExploreCompression: FunctionComponent<
           compressed={compressed.slice(0, numSamples)}
           width={width - 30} // leave room for scrollbar
           height={400}
-          mode={plotMode}
         />
       ))}
     </div>
@@ -276,91 +291,6 @@ const CompressionRatioVsNRMSEPlot: FunctionComponent<
     return { data, layout };
   }, [nrmses, compressionRatios, width, height]);
   return <LazyPlotlyPlot data={data} layout={layout} />;
-};
-
-type CompressionPlotProps = {
-  title: string;
-  original: number[];
-  compressed: number[];
-  samplingFrequency: number;
-  width: number;
-  height: number;
-  mode?: CompressionPlotMode;
-};
-
-export const CompressionPlot: FunctionComponent<CompressionPlotProps> = ({
-  title,
-  original,
-  compressed,
-  samplingFrequency,
-  width,
-  height,
-  mode = "default",
-}) => {
-  const { data, layout } = useMemo(() => {
-    const timestamps = timestampsForSignal(
-      original.length,
-      samplingFrequency,
-    ).map((t) => t * 1000); // milliseconds
-
-    const data =
-      mode === "default"
-        ? [
-            {
-              x: timestamps,
-              y: original,
-              type: "scatter",
-              mode: "lines",
-              name: "Original",
-            },
-            {
-              x: timestamps,
-              y: compressed,
-              type: "scatter",
-              mode: "lines",
-              name: "Compressed",
-            },
-          ]
-        : [
-            {
-              x: timestamps,
-              y: original.map((v, i) => v - compressed[i]),
-              type: "scatter",
-              mode: "lines",
-              line: { color: "green" },
-              name: "Residual",
-            },
-          ];
-    const layout = {
-      width,
-      height,
-      title,
-      margin: {
-        l: 60,
-        r: 20,
-        t: 70,
-        b: 60,
-        pad: 0,
-      },
-      xaxis: {
-        title: "Time (ms)",
-        automargin: false,
-      },
-      yaxis: {
-        title: mode === "default" ? "Signal" : "Residual",
-        automargin: false,
-        tickpadding: 5,
-        ticklen: 4,
-      },
-      showlegend: true,
-    };
-    return { data, layout };
-  }, [title, samplingFrequency, original, compressed, width, height, mode]);
-  return <LazyPlotlyPlot data={data} layout={layout} />;
-};
-
-const timestampsForSignal = (numSamples: number, samplingFrequency: number) => {
-  return Array.from({ length: numSamples }, (_, i) => i / samplingFrequency);
 };
 
 export default DivExploreCompression;

@@ -2,6 +2,36 @@
 import { FunctionComponent } from "react";
 import { Filter, WaveletName, waveletNameChoices } from "../../common";
 
+export type CompressionMethod = "QWC" | "QFC" | "QTC";
+
+const methodChoices: CompressionMethod[] = ["QWC", "QFC", "QTC"];
+
+type MethodSelectorProps = {
+  method: CompressionMethod;
+  setMethod: (method: CompressionMethod) => void;
+};
+
+export const MethodSelector: FunctionComponent<MethodSelectorProps> = ({
+  method,
+  setMethod,
+}) => {
+  return (
+    <div>
+      <label>Method:&nbsp;</label>
+      <select
+        value={method}
+        onChange={(e) => setMethod(e.target.value as CompressionMethod)}
+      >
+        {methodChoices.map((name) => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
 const numSamplesChoices = [32, 64, 128, 256, 512, 1024, 2048];
 
 type NumSamplesSelectorProps = {
@@ -83,38 +113,6 @@ export const FilterSelector: FunctionComponent<FilterSelectorProps> = ({
         {filterChoices.map((name) => (
           <option key={name} value={name}>
             {name}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
-
-export type CompressionPlotMode = "default" | "residual";
-
-const compressionPlotModeChoices: CompressionPlotMode[] = [
-  "default",
-  "residual",
-];
-
-type CompressionPlotModeSelectorProps = {
-  mode: CompressionPlotMode;
-  setMode: (mode: CompressionPlotMode) => void;
-};
-
-export const CompressionPlotModeSelector: FunctionComponent<
-  CompressionPlotModeSelectorProps
-> = ({ mode, setMode }) => {
-  return (
-    <div>
-      <label>Plot mode:&nbsp;</label>
-      <select
-        value={mode}
-        onChange={(e) => setMode(e.target.value as CompressionPlotMode)}
-      >
-        {compressionPlotModeChoices.map((name) => (
-          <option key={name} value={name}>
-            {name === "default" ? "Original & Compressed" : "Residual"}
           </option>
         ))}
       </select>

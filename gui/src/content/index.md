@@ -123,31 +123,13 @@ show_compression_method_comparison("real", use_filter=True)
 
 Let's take a closer look at the compressed signals to get some insight into the errors that are being introduced at various compression levels.
 
-<figure>
-<div class="DivCompressionPlot" wavelet_name="time-domain" num_samples="1024" signal_type="gaussian_noise" nrmses="0.3"></div>
-<figcaption>
-<strong>Figure 3:</strong> A Gaussian signal compressed using QTC.</figcaption>
-</figure>
+<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.4" filt_lowcut="300" filt_highcut="6000"></div>
 
-<figure>
-<div class="DivCompressionPlot" wavelet_name="fourier" num_samples="1024" signal_type="gaussian_noise" nrmses="0.3"></div>
-<figcaption>
-<strong>Figure 4:</strong> A Gaussian signal compressed using QFC.</figcaption>
-</figure>
+<div class="DivCompressionPlot" wavelet_name="fourier" num_samples="1024" signal_type="real_ephys_1" nrmses="0.4" transform="fourier" filt_lowcut="300" filt_highcut="6000"></div>
 
-<figure>
-<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="gaussian_noise" nrmses="0.3"></div>
-<figcaption>
-<strong>Figure 5:</strong> A Gaussian signal compressed using QWC with db4 wavelets.</figcaption>
-</figure>
+These compression ratios are much higher for QWC and QFC than for QTC:
 
-<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.3"></div>
-
-<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6"></div>
-
-<div class="DivCompressionPlot" wavelet_name="db4" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6" filt_lowcut="300" filt_highcut="6000"></div>
-
-<div class="DivCompressionPlot" wavelet_name="fourier" num_samples="1024" signal_type="real_ephys_1" nrmses="0.6" transform="fourier" filt_lowcut="300" filt_highcut="6000"></div>
+<div class="DivCompressionPlot" wavelet_name="time-domain" num_samples="1024" signal_type="real_ephys_1" nrmses="0.4" filt_lowcut="300" filt_highcut="6000"></div>
 
 ---
 
